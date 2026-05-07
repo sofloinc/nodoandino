@@ -7,7 +7,7 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const app = express();
 
-const { User, Entidad, Curso, Materia, Nota, Noticia, mongoose } = require('./database');
+const { User, Entidad, Curso, Materia, Inscripcion, Nota, Noticia, mongoose } = require('./database');
 
 // Configuración de Multer
 const storage = multer.diskStorage({
@@ -34,7 +34,7 @@ const isAuthenticated = (req, res, next) => {
 };
 
 const isAdmin = (req, res, next) => {
-    if (['admin_global', 'director', 'secretario'].includes(req.session.userRole)) return next();
+    if (['admin_global', 'director', 'administrativo'].includes(req.session.userRole)) return next();
     res.status(403).send('No autorizado');
 };
 
@@ -65,123 +65,58 @@ app.get('/api/user', isAuthenticated, (req, res) => {
     res.json({ dni: req.session.userDni, name: req.session.userName, role: req.session.userRole, entidadId: req.session.entidadId });
 });
 
-app.get('/api/entidad', isAuthenticated, async (req, res) => {
-    if (!req.session.entidadId) return res.json({ nombre: 'PEI Global' });
-    const entidad = await Entidad.findById(req.session.entidadId);
-    res.json(entidad);
-});
-
-// API ACADÉMICA
+// API ACADÉMICA DOCENTE
 app.get('/api/materias', isAuthenticated, async (req, res) => {
-    let filter = {};
+    let filter = { ciclo_lectivo: 2026 };
     if (req.session.userRole === 'docente') filter.docente_dni = req.session.userDni;
-    if (req.session.entidadId && req.session.userRole !== 'admin_global') {
-        // En un caso real filtraríamos por entidad_id a través de curso_id
-    }
     const materias = await Materia.find(filter).populate('curso_id');
     res.json(materias);
 });
 
-app.get('/api/boletin', isAuthenticated, async (req, res) => {
-    const notas = await Nota.find({ alumno_dni: req.session.userDni }).populate('materia_id');
-    res.json(notas);
-});
-
-app.get('/api/noticias', isAuthenticated, async (req, res) => {
-    const filter = req.session.entidadId ? { entidad_id: req.session.entidadId } : {};
-    const noticias = await Noticia.find(filter).sort({ fecha: -1 });
-    res.json(noticias);
-});
-
-// --- GESTIÓN ACADÉMICA (Director/Admin) ---
-
-// Crear Curso
-app.post('/api/admin/cursos', isAuthenticated, isAdmin, async (req, res) => {
+// Obtener alumnos de una materia específica
+app.get('/api/materias/:id/alumnos', isAuthenticated, async (req, res) => {
     try {
-        const nuevoCurso = await new Curso({ 
-            nombre: req.body.nombre, 
-            nivel: req.body.nivel, 
-            entidad_id: req.session.entidadId 
-        }).save();
-        res.json(nuevoCurso);
+        const materia = await Materia.findById(req.params.id);
+        if (!materia) return res.status(404).json({ error: 'Materia no encontrada' });
+        
+        // Alumnos inscriptos en el curso de esta materia
+        const inscripciones = await Inscripcion.find({ curso_id: materia.curso_id });
+        const dnis = inscripciones.map(i => i.alumno_dni);
+        const alumnos = await User.find({ dni: { $in: dnis } }).sort({ nombre_completo: 1 });
+        
+        res.json(alumnos);
     } catch (err) {
-        res.status(500).json({ error: 'Error al crear curso' });
+        res.status(500).json({ error: 'Error' });
     }
 });
 
-// Crear Materia y Asignar Docente
-app.post('/api/admin/materias', isAuthenticated, isAdmin, async (req, res) => {
+// Cargar Nota o Informe de Avance
+app.post('/api/notas', isAuthenticated, async (req, res) => {
     try {
-        const nuevaMateria = await new Materia({
-            nombre: req.body.nombre,
-            area: req.body.area,
-            curso_id: req.body.curso_id,
-            docente_dni: req.body.docente_dni,
-            ciclo_lectivo: req.body.ciclo_lectivo || new Date().getFullYear()
-        }).save();
-        res.json(nuevaMateria);
+        const { alumno_dni, materia_id, valor, tipo, periodo, comentario } = req.body;
+        const nuevaNota = await new Nota({ alumno_dni, materia_id, valor, tipo, periodo, comentario }).save();
+        res.json(nuevaNota);
     } catch (err) {
-        res.status(500).json({ error: 'Error al asignar materia' });
+        res.status(500).json({ error: 'Error al cargar nota' });
     }
 });
 
+// API ADMINISTRATIVA
 app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     const filter = req.session.userRole === 'admin_global' ? {} : { entidad_id: req.session.entidadId };
-    if (req.query.role) filter.rol = req.query.role; 
     const users = await User.find(filter).sort({ nombre_completo: 1 });
     res.json(users);
 });
 
-// Ver Detalle de Usuario (Legajo)
 app.get('/api/admin/users/:dni', isAuthenticated, isAdmin, async (req, res) => {
-    try {
-        const user = await User.findOne({ dni: req.params.dni }).populate('entidad_id');
-        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
-        
-        // Si es alumno, traer sus notas
-        let extra = {};
-        if (user.rol === 'alumno') {
-            extra.notas = await Nota.find({ alumno_dni: user.dni }).populate('materia_id');
-        }
-        // Si es docente, traer sus materias
-        if (user.rol === 'docente') {
-            extra.materias = await Materia.find({ docente_dni: user.dni }).populate('curso_id');
-        }
-
-        res.json({ ...user._doc, ...extra });
-    } catch (err) {
-        res.status(500).json({ error: 'Error al obtener detalle' });
+    const user = await User.findOne({ dni: req.params.dni }).populate('entidad_id');
+    let extra = {};
+    if (user.rol === 'alumno') {
+        const insc = await Inscripcion.findOne({ alumno_dni: user.dni }).populate('curso_id');
+        extra.curso = insc ? insc.curso_id.nombre : 'Sin asignar';
+        extra.notas = await Nota.find({ alumno_dni: user.dni }).populate('materia_id');
     }
-});
-
-// --- GESTIÓN GLOBAL (SuperAdmin) ---
-
-// Listar Instituciones
-app.get('/api/admin/entidades', isAuthenticated, isAdmin, async (req, res) => {
-    try {
-        const entidades = await Entidad.find();
-        res.json(entidades);
-    } catch (err) {
-        res.status(500).json({ error: 'Error al obtener instituciones' });
-    }
-});
-
-// Crear Nueva Institución + Director Inicial
-app.post('/api/admin/entidades', isAuthenticated, isAdmin, async (req, res) => {
-    const { nombre, direccion, telefono, directorDni, directorNombre, directorPassword } = req.body;
-    try {
-        const nuevaEntidad = await new Entidad({ nombre, direccion, telefono }).save();
-        await new User({
-            dni: directorDni,
-            password: directorPassword,
-            nombre_completo: directorNombre,
-            rol: 'director',
-            entidad_id: nuevaEntidad._id
-        }).save();
-        res.json({ message: 'Institución y Director creados con éxito' });
-    } catch (err) {
-        res.status(500).json({ error: 'Error al crear la institución' });
-    }
+    res.json({ ...user._doc, ...extra });
 });
 
 app.get('/logout', (req, res) => {
@@ -190,4 +125,4 @@ app.get('/logout', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 PEI Masivo activo en puerto ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 PEI Platform activa en puerto ${PORT}`));
