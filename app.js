@@ -60,6 +60,11 @@ app.get('/logout', (req, res) => {
     res.redirect('/');
 });
 
+// API: Obtener info del usuario logueado
+app.get('/api/user', isAuthenticated, (req, res) => {
+    res.json({ username: req.session.username });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor en puerto ${PORT}`);

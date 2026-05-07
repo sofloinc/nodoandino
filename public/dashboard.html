@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | NodoAndino</title>
+    <link rel="stylesheet" href="estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                NODO<span style="color: var(--secondary);">ANDINO</span>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active"><i class="fas fa-home"></i> Inicio</a>
+                <a href="#" class="nav-item"><i class="fas fa-book"></i> Cursos</a>
+                <a href="#" class="nav-item"><i class="fas fa-users"></i> Estudiantes</a>
+                <a href="#" class="nav-item"><i class="fas fa-chart-pie"></i> Reportes</a>
+                <a href="#" class="nav-item"><i class="fas fa-cog"></i> Configuración</a>
+            </nav>
+            <div style="padding: 0 30px;">
+                <a href="/logout" class="nav-item" style="border-left: none; opacity: 0.6;"><i class="fas fa-sign-out-alt"></i> Salir</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <div>
+                    <h1 style="color: var(--primary); font-size: 1.8rem;">Panel de Control</h1>
+                    <p style="color: #666;">Bienvenido de nuevo, <span id="user-display-name">Administrador</span>.</p>
+                </div>
+                <div class="user-profile">
+                    <div style="text-align: right;">
+                        <p style="font-weight: 600; font-size: 0.9rem;" id="user-role">Administrador</p>
+                        <p style="font-size: 0.8rem; color: #888;" id="user-email">admin@nodoandino.com</p>
+                    </div>
+                    <div class="avatar" id="user-avatar">A</div>
+                </div>
+            </header>
+
+            <!-- Stats Grid -->
+            <section class="stats-grid">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon" style="background: rgba(42, 75, 124, 0.1); color: var(--primary);">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>Total Alumnos</h4>
+                        <p>1,284</p>
+                    </div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon" style="background: rgba(230, 126, 34, 0.1); color: var(--secondary);">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>Cursos Activos</h4>
+                        <p>42</p>
+                    </div>
+                </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon" style="background: rgba(241, 196, 15, 0.1); color: var(--accent);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h4>Horas de Vuelo</h4>
+                        <p>3,450</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Content Area -->
+            <section class="glass-card content-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3>Contenido Reciente</h3>
+                    <button class="btn-premium btn-primary-premium" style="padding: 8px 20px; font-size: 0.9rem;">+ Nuevo Curso</button>
+                </div>
+                
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Nombre del Curso</th>
+                            <th>Instructor</th>
+                            <th>Estado</th>
+                            <th>Inscritos</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Introducción a la IA Educativa</strong></td>
+                            <td>Dra. Elena Peñaloza</td>
+                            <td><span class="badge badge-success">Activo</span></td>
+                            <td>342</td>
+                            <td><i class="fas fa-ellipsis-h" style="cursor: pointer; color: #ccc;"></i></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Matemática Galáctica 3.0</strong></td>
+                            <td>Prof. Marcos Sierra</td>
+                            <td><span class="badge badge-success">Activo</span></td>
+                            <td>128</td>
+                            <td><i class="fas fa-ellipsis-h" style="cursor: pointer; color: #ccc;"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <script>
+                fetch('/api/user')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.username) {
+                            document.getElementById('user-display-name').textContent = data.username;
+                            document.getElementById('user-role').textContent = data.username.charAt(0).toUpperCase() + data.username.slice(1);
+                            document.getElementById('user-avatar').textContent = data.username.charAt(0).toUpperCase();
+                            document.getElementById('user-email').textContent = data.username + '@nodoandino.com';
+                        }
+                    })
+                    .catch(err => console.error('Error fetching user:', err));
+            </script>
+        </main>
+    </div>
+</body>
+
+</html>
