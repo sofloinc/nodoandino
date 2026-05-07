@@ -8,20 +8,7 @@ if (!MONGO_URI) {
 } else {
     mongoose.connect(MONGO_URI)
         .then(async () => {
-            console.log("✅ Conectado a MongoDB Atlas (PEI)");
-            
-            // LIMPIEZA TOTAL PARA EL DEMO (Evita conflictos de índices y datos parciales)
-            try {
-                const collections = await mongoose.connection.db.collections();
-                for (let collection of collections) {
-                    await collection.deleteMany({});
-                    try { await collection.dropIndexes(); } catch (e) {}
-                }
-                console.log("🧹 Base de datos limpiada para nueva carga.");
-            } catch (e) {
-                console.error("Error al limpiar DB:", e.message);
-            }
-            
+            console.log("✅ Conectado a MongoDB Atlas (PEI Core)");
             seedDemo();
         })
         .catch(err => console.error("❌ Error MongoDB:", err));
@@ -42,12 +29,13 @@ const UserSchema = new mongoose.Schema({
     password: { type: String, required: true },
     nombre_completo: { type: String, required: true },
     rol: { type: String, required: true }, 
-    entidad_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Entidad' }
+    entidad_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Entidad' },
+    documentos: [String] // Rutas a archivos subidos
 });
 
 const CursoSchema = new mongoose.Schema({
-    nombre: String,
-    nivel: String,
+    nombre: String, // Ej: 1A
+    nivel: String, // inicial, primaria, secundaria, terciario
     entidad_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Entidad' }
 });
 
@@ -66,31 +54,41 @@ const Materia = mongoose.model('Materia', MateriaSchema);
 
 async function seedDemo() {
     try {
-        // 1. Crear Entidad
-        const perito = await new Entidad({
-            nombre: 'Instituto Perito Moreno',
-            direccion: 'Av. Bustillo 123, Bariloche',
-            telefono: '294-4556677'
-        }).save();
+        const count = await Entidad.countDocuments({ nombre: 'Instituto Perito Moreno' });
+        if (count === 0) {
+            await User.deleteMany({});
+            await Curso.deleteMany({});
+            await Materia.deleteMany({});
+            
+            const perito = await new Entidad({
+                nombre: 'Instituto Perito Moreno',
+                direccion: 'Av. Bustillo 123, Bariloche',
+                telefono: '294-4556677'
+            }).save();
 
-        // 2. Usuarios Demo
-        await User.create([
-            { dni: '123', password: 'admin', nombre_completo: 'Pugliese Nicolas', rol: 'admin_global' },
-            { dni: '456', password: 'perito', nombre_completo: 'Director Perito', rol: 'director', entidad_id: perito._id },
-            { dni: '111', password: 'docente', nombre_completo: 'Prof. Juan Perez', rol: 'docente', entidad_id: perito._id },
-            { dni: '1001', password: 'alumno', nombre_completo: 'Alumno Ejemplo 1', rol: 'alumno', entidad_id: perito._id }
-        ]);
+            // Usuarios
+            await User.create([
+                { dni: '123', password: 'admin', nombre_completo: 'Pugliese Nicolas', rol: 'admin_global' },
+                { dni: '456', password: 'perito', nombre_completo: 'Director Perito', rol: 'director', entidad_id: perito._id },
+                { dni: '111', password: 'docente', nombre_completo: 'Prof. Juan Perez', rol: 'docente', entidad_id: perito._id },
+                { dni: '1001', password: 'alumno', nombre_completo: 'Alumno Ejemplo 1', rol: 'alumno', entidad_id: perito._id }
+            ]);
 
-        // 3. Cursos
-        const curso1A = await new Curso({ nombre: '1A', nivel: 'secundaria', entidad_id: perito._id }).save();
+            // Cursos
+            const c1A = await new Curso({ nombre: '1A', nivel: 'secundaria', entidad_id: perito._id }).save();
+            const c2A = await new Curso({ nombre: '2A', nivel: 'secundaria', entidad_id: perito._id }).save();
 
-        // 4. Materias
-        await Materia.create([
-            { nombre: 'Matemática', area: 'Exactas', curso_id: curso1A._id, docente_dni: '111' },
-            { nombre: 'Lengua', area: 'Comunicación', curso_id: curso1A._id, docente_dni: '111' }
-        ]);
+            // Áreas ESRN (Ejemplos)
+            const areasESRN = [
+                { nombre: 'Matemática', area: 'Matemática e Informática', curso_id: c1A._id, docente_dni: '111' },
+                { nombre: 'Lengua y Literatura', area: 'Lengua y Literatura', curso_id: c1A._id, docente_dni: '111' },
+                { nombre: 'Biología', area: 'Ciencias Naturales', curso_id: c1A._id, docente_dni: '111' },
+                { nombre: 'Historia', area: 'Ciencias Sociales', curso_id: c1A._id, docente_dni: '111' }
+            ];
+            await Materia.insertMany(areasESRN);
 
-        console.log('✅ Base de datos MongoDB Atlas inicializada con demo PEI (Carga limpia).');
+            console.log('✅ Demo PEI recreada con Áreas ESRN y legajos.');
+        }
     } catch (err) {
         console.error('Error al seedear Mongo:', err.message);
     }

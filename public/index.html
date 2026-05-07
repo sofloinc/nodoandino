@@ -9,111 +9,147 @@
     <link rel="stylesheet" href="estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
     <style>
-        .social-links a { font-size: 1.5rem; margin: 0 10px; color: white; transition: 0.3s; }
-        .social-links a:hover { color: var(--accent); }
-        .pricing-badge { background: var(--accent); color: var(--dark); padding: 5px 15px; border-radius: 20px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
-        .legal-footer { font-size: 0.8rem; opacity: 0.7; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+        /* Ajustes para Single Page Hero */
+        body, html { height: 100%; margin: 0; overflow: hidden; }
+        .hero { height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
+        
+        /* Modales */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card { width: 400px; max-width: 90%; }
+        
+        .social-links-float { position: absolute; bottom: 30px; left: 30px; display: flex; gap: 20px; z-index: 100; }
+        .social-links-float a { color: white; font-size: 1.2rem; opacity: 0.7; transition: 0.3s; }
+        .social-links-float a:hover { opacity: 1; color: var(--accent); }
+        
+        .branding-float { position: absolute; bottom: 30px; right: 30px; text-align: right; color: white; opacity: 0.7; font-size: 0.8rem; z-index: 100; }
+        
+        .close-modal { position: absolute; top: 20px; right: 20px; color: white; font-size: 1.5rem; cursor: pointer; }
     </style>
 </head>
 
-<body>
+<body class="bg-gradient-andean">
     <!-- Navigation -->
-    <nav class="glass-nav">
-        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
-            <div class="logo" style="font-weight: 800; font-size: 1.5rem; color: var(--primary);">
+    <nav class="glass-nav" style="position: absolute; width: 100%; top: 0; background: transparent; border: none;">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
+            <div class="logo" style="font-weight: 800; font-size: 1.5rem; color: white;">
                 PEI<span style="color: var(--secondary);"> INTEGRAL</span>
             </div>
             <div class="nav-links">
-                <a href="#demo" style="margin-right: 20px; text-decoration: none; color: var(--dark); font-weight: 600;">Solicitar Demo</a>
-                <a href="#acceso" class="btn-premium btn-primary-premium">Ingresar</a>
+                <button onclick="openModal('modal-login')" class="btn-premium btn-primary-premium">Ingresar</button>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <header class="bg-gradient-andean hero" style="min-height: 90vh;">
-        <div class="container">
-            <div class="pricing-badge">OFERTA LANZAMIENTO</div>
-            <h1 style="margin-top: 0;">Gestión Educativa <br><span style="color: var(--accent);">de Próxima Generación</span></h1>
-            <p>PEI es la solución definitiva para niveles Inicial, Primaria, Secundaria y Terciaria. Centraliza legajos, notas, asistencias y comunicación en un solo entorno profesional.</p>
-            <h2 style="color: white; margin-bottom: 30px;">$150.000 <small style="font-size: 1rem; opacity: 0.8;">ARS / mes</small></h2>
+    <!-- Hero Section (Single Screen) -->
+    <header class="hero">
+        <div class="container" style="text-align: center; color: white;">
+            <div style="background: var(--accent); color: var(--dark); padding: 5px 15px; border-radius: 20px; font-weight: 800; display: inline-block; margin-bottom: 20px;">OFERTA LANZAMIENTO</div>
+            <h1 style="font-size: clamp(2.5rem, 8vw, 4.5rem); margin-bottom: 20px;">Gestión Educativa <br><span style="color: var(--accent);">Profesional</span></h1>
+            <p style="max-width: 600px; margin: 0 auto 40px; font-size: 1.2rem; opacity: 0.9;">
+                La solución definitiva para instituciones de todos los niveles. Centraliza legajos, notas y comunicación en un entorno premium.
+            </p>
             <div class="hero-btns">
-                <a href="#demo" class="btn-premium btn-primary-premium">Solicitar Demo Gratis</a>
-                <a href="#acceso" class="btn-premium btn-outline-premium" style="margin-left: 15px;">Acceso con DNI</a>
+                <button onclick="openModal('modal-demo')" class="btn-premium btn-primary-premium" style="padding: 15px 40px;">Solicitar Demo Gratis</button>
             </div>
+            <div style="margin-top: 20px; font-weight: 700; font-size: 1.5rem;">$150.000 <small style="font-size: 0.9rem; opacity: 0.7;">ARS / mes</small></div>
         </div>
     </header>
 
-    <!-- Social & Branding -->
-    <section class="section-padding" style="background: var(--dark); color: white; text-align: center;">
-        <div class="container">
-            <h3>Desarrollado por <span style="color: var(--secondary);">Pugliese Nicolas</span></h3>
-            <p style="opacity: 0.8;">Patrocinado por <strong>Sapiencia Virtual</strong></p>
-            <div class="social-links" style="margin: 30px 0;">
-                <a href="https://www.youtube.com/@sapienciavirtual" target="_blank"><i class="fab fa-youtube"></i></a>
-                <a href="https://www.instagram.com/sapienciavirtualbariloche/" target="_blank"><i class="fab fa-instagram"></i></a>
-                <a href="https://www.tiktok.com/@sapienciavirtual" target="_blank"><i class="fab fa-tiktok"></i></a>
-                <a href="https://www.facebook.com/profile.php?id=100067019960550" target="_blank"><i class="fab fa-facebook"></i></a>
-            </div>
-        </div>
-    </section>
+    <!-- Floating Branding & Social -->
+    <div class="social-links-float">
+        <a href="https://www.youtube.com/@sapienciavirtual" target="_blank"><i class="fab fa-youtube"></i></a>
+        <a href="https://www.instagram.com/sapienciavirtualbariloche/" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.tiktok.com/@sapienciavirtual" target="_blank"><i class="fab fa-tiktok"></i></a>
+        <a href="https://www.facebook.com/profile.php?id=100067019960550" target="_blank"><i class="fab fa-facebook"></i></a>
+    </div>
 
-    <!-- Login Section -->
-    <section id="acceso" class="section-padding">
-        <div class="section-title">
-            <h2>Acceso a la Plataforma</h2>
-            <p>Ingresa con tu DNI y contraseña</p>
-            <div class="underline"></div>
-        </div>
-        
-        <div class="glass-card login-form-container">
+    <div class="branding-float">
+        Desarrollado por <strong>Pugliese Nicolas</strong><br>
+        Patrocinado por <strong>Sapiencia Virtual</strong>
+    </div>
+
+    <!-- MODAL: LOGIN -->
+    <div id="modal-login" class="modal-overlay">
+        <span class="close-modal" onclick="closeModal('modal-login')">&times;</span>
+        <div class="glass-card modal-card" style="padding: 40px;">
+            <h2 style="text-align: center; margin-bottom: 30px; color: var(--primary);">Iniciar Sesión</h2>
             <form action="/login" method="POST">
                 <div class="form-group">
                     <label>DNI</label>
-                    <input type="text" name="dni" class="form-control-premium" placeholder="Tu número de documento" required>
+                    <input type="text" name="dni" class="form-control-premium" placeholder="Ingresa tu DNI" required>
                 </div>
                 <div class="form-group">
                     <label>Contraseña</label>
                     <input type="password" name="password" class="form-control-premium" placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="btn-premium btn-primary-premium" style="width: 100%; margin-top: 10px;">
-                    Entrar al Sistema
-                </button>
+                <button type="submit" class="btn-premium btn-primary-premium" style="width: 100%; margin-top: 10px;">Entrar</button>
             </form>
-            <p style="margin-top: 20px; text-align: center; font-size: 0.9rem; color: #888;">
-                ¿Olvidaste tu contraseña? Contacta a tu institución.
+            <p style="font-size: 0.8rem; color: #888; margin-top: 20px; text-align: center;">
+                Al ingresar, aceptas nuestro compromiso de confidencialidad de datos.
             </p>
         </div>
-    </section>
+    </div>
 
-    <!-- Demo Section -->
-    <section id="demo" class="section-padding" style="background: #eee;">
-        <div class="container" style="max-width: 800px; text-align: center;">
-            <h2>Solicita una Charla o Demo</h2>
-            <p>Descubre cómo PEI puede transformar tu institución. Agenda una reunión personalizada.</p>
-            <form class="glass-card" style="margin-top: 30px; padding: 40px; text-align: left;">
-                <div class="form-group"><label>Nombre del Colegio</label><input type="text" class="form-control-premium" required></div>
-                <div class="form-group"><label>Email de Contacto</label><input type="email" class="form-control-premium" required></div>
-                <button type="button" class="btn-premium btn-primary-premium" style="width: 100%;">Enviar Solicitud</button>
+    <!-- MODAL: DEMO -->
+    <div id="modal-demo" class="modal-overlay">
+        <span class="close-modal" onclick="closeModal('modal-demo')">&times;</span>
+        <div class="glass-card modal-card" style="padding: 40px; width: 500px;">
+            <h2 style="text-align: center; margin-bottom: 20px; color: var(--primary);">Solicitar Demo</h2>
+            <p style="text-align: center; margin-bottom: 30px; font-size: 0.9rem;">Déjanos tus datos y un asesor se contactará para una charla personalizada.</p>
+            <form>
+                <div class="form-group">
+                    <label>Nombre de la Institución</label>
+                    <input type="text" class="form-control-premium" required>
+                </div>
+                <div class="form-group">
+                    <label>Email de Contacto</label>
+                    <input type="email" class="form-control-premium" required>
+                </div>
+                <div class="form-group">
+                    <label>Teléfono / WhatsApp</label>
+                    <input type="text" class="form-control-premium" required>
+                </div>
+                <button type="button" class="btn-premium btn-primary-premium" style="width: 100%; margin-top: 10px;" onclick="alert('Solicitud enviada. ¡Pronto nos contactaremos!')">Enviar Solicitud</button>
             </form>
         </div>
-    </section>
+    </div>
 
-    <footer style="background: var(--dark); color: white; padding: 60px 20px; text-align: center;">
-        <div class="container">
-            <div class="social-links" style="margin-bottom: 30px;">
-                <a href="#"><i class="fab fa-youtube"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-tiktok"></i></a>
-            </div>
-            <p>&copy; 2026 PEI Platform. Todos los derechos reservados.</p>
-            <div class="legal-footer">
-                <strong>AVISO LEGAL Y COMPROMISO DE PRIVACIDAD:</strong><br>
-                Nos comprometemos formalmente a no hacer difusión, venta o uso indebido de los datos contenidos en esta plataforma. 
-                La seguridad de la comunidad educativa es nuestra prioridad. Sapiencia Virtual garantiza la confidencialidad de los legajos.
-            </div>
-        </div>
-    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        // Cerrar modales al hacer clic fuera de la card
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // Manejo de Errores de Login
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('error') === 'login_failed') {
+            openModal('modal-login'); // Reabrir el modal para mostrar el error
+            Swal.fire({
+                icon: 'error',
+                title: 'Acceso Denegado',
+                text: 'DNI o contraseña incorrectos.',
+                confirmButtonColor: '#2A4B7C',
+                timer: 3000
+            });
+            window.history.replaceState({}, document.title, "/");
+        }
+    </script>
 </body>
 
 </html>
