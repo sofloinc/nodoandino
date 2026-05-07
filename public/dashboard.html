@@ -4,27 +4,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | NodoAndino</title>
+    <title>PEI Dashboard | Gestión Educativa</title>
     <link rel="stylesheet" href="estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+        .sidebar-brand { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .school-logo { width: 80px; height: 80px; border-radius: 50%; background: white; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .school-logo img { width: 100%; height: auto; }
+    </style>
 </head>
 
 <body>
     <div class="dashboard-container">
         <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="sidebar-logo">
-                NODO<span style="color: var(--secondary);">ANDINO</span>
+            <div class="sidebar-brand">
+                <div class="school-logo" id="sidebar-school-logo">
+                    <i class="fas fa-school" style="color: var(--primary); font-size: 2rem;"></i>
+                </div>
+                <div id="sidebar-school-name" style="font-weight: 700; font-size: 0.9rem; color: white;">PEI Platform</div>
             </div>
             <nav class="nav-menu">
-                <a href="#" class="nav-item active"><i class="fas fa-home"></i> Inicio</a>
-                <a href="#" class="nav-item"><i class="fas fa-book"></i> Cursos</a>
-                <a href="#" class="nav-item"><i class="fas fa-users"></i> Estudiantes</a>
-                <a href="#" class="nav-item"><i class="fas fa-chart-pie"></i> Reportes</a>
-                <a href="#" class="nav-item"><i class="fas fa-cog"></i> Configuración</a>
+                <a href="#" class="nav-item active" onclick="showView('home')"><i class="fas fa-home"></i> Inicio</a>
+                
+                <!-- Admin Global -->
+                <div id="menu-admin-global" style="display: none;">
+                    <a href="#" class="nav-item" onclick="showView('entidades')"><i class="fas fa-university"></i> Instituciones</a>
+                </div>
+
+                <!-- Director / Secretario -->
+                <div id="menu-gestion" style="display: none;">
+                    <a href="#" class="nav-item" onclick="showView('legajos')"><i class="fas fa-address-card"></i> Legajos</a>
+                    <a href="#" class="nav-item" onclick="showView('cursos')"><i class="fas fa-layer-group"></i> Cursos</a>
+                </div>
+
+                <!-- Docente -->
+                <div id="menu-docente" style="display: none;">
+                    <a href="#" class="nav-item" onclick="showView('asistencia')"><i class="fas fa-clipboard-check"></i> Asistencia</a>
+                    <a href="#" class="nav-item" onclick="showView('notas')"><i class="fas fa-pen-nib"></i> Cargar Notas</a>
+                </div>
+
+                <!-- Alumno / Tutor -->
+                <div id="menu-alumno" style="display: none;">
+                    <a href="#" class="nav-item" onclick="showView('boletin')"><i class="fas fa-file-invoice"></i> Mi Boletín</a>
+                </div>
+
+                <a href="#" class="nav-item"><i class="fas fa-envelope"></i> Avisos</a>
             </nav>
-            <div style="padding: 0 30px;">
-                <a href="/logout" class="nav-item" style="border-left: none; opacity: 0.6;"><i class="fas fa-sign-out-alt"></i> Salir</a>
+            <div style="padding: 20px;">
+                <a href="/logout" class="nav-item" style="border-left: none; opacity: 0.6;"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
             </div>
         </aside>
 
@@ -32,100 +62,134 @@
         <main class="main-content">
             <header class="dashboard-header">
                 <div>
-                    <h1 style="color: var(--primary); font-size: 1.8rem;">Panel de Control</h1>
-                    <p style="color: #666;">Bienvenido de nuevo, <span id="user-display-name">Administrador</span>.</p>
+                    <h1 id="view-title" style="color: var(--primary); font-size: 1.8rem;">Cargando...</h1>
+                    <p style="color: #666;">Bienvenido, <span id="user-display-name">...</span>.</p>
                 </div>
                 <div class="user-profile">
                     <div style="text-align: right;">
-                        <p style="font-weight: 600; font-size: 0.9rem;" id="user-role">Administrador</p>
-                        <p style="font-size: 0.8rem; color: #888;" id="user-email">admin@nodoandino.com</p>
+                        <p style="font-weight: 600; font-size: 0.9rem;" id="user-role-display">...</p>
+                        <p style="font-size: 0.8rem; color: #888;" id="user-dni-display">...</p>
                     </div>
-                    <div class="avatar" id="user-avatar">A</div>
+                    <div class="avatar" id="user-avatar">?</div>
                 </div>
             </header>
 
-            <!-- Stats Grid -->
-            <section class="stats-grid">
-                <div class="glass-card stat-card">
-                    <div class="stat-icon" style="background: rgba(42, 75, 124, 0.1); color: var(--primary);">
-                        <i class="fas fa-user-graduate"></i>
+            <!-- VISTAS -->
+            <div id="home-view" class="view-section active">
+                <section class="stats-grid">
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon" style="background: rgba(42, 75, 124, 0.1); color: var(--primary);"><i class="fas fa-bullhorn"></i></div>
+                        <div class="stat-info"><h4>Último Aviso</h4><p>Reunión de Padres</p></div>
                     </div>
-                    <div class="stat-info">
-                        <h4>Total Alumnos</h4>
-                        <p>1,284</p>
+                    <div class="glass-card stat-card">
+                        <div class="stat-icon" style="background: rgba(230, 126, 34, 0.1); color: var(--secondary);"><i class="fas fa-calendar-day"></i></div>
+                        <div class="stat-info"><h4>Fecha Hoy</h4><p id="current-date">...</p></div>
                     </div>
-                </div>
-                <div class="glass-card stat-card">
-                    <div class="stat-icon" style="background: rgba(230, 126, 34, 0.1); color: var(--secondary);">
-                        <i class="fas fa-chalkboard-teacher"></i>
+                </section>
+                <section class="glass-card content-card">
+                    <h3>Bienvenido a la Plataforma PEI</h3>
+                    <p>Utiliza el menú lateral para acceder a las funciones correspondientes a tu rol.</p>
+                    <div style="margin-top: 20px; padding: 20px; background: #fff9e6; border-radius: 10px; border-left: 5px solid var(--accent);">
+                        <strong>Material de Ayuda:</strong> Si tienes dudas sobre el uso de la plataforma, consulta la <a href="#">Documentación Oficial</a>.
                     </div>
-                    <div class="stat-info">
-                        <h4>Cursos Activos</h4>
-                        <p>42</p>
-                    </div>
-                </div>
-                <div class="glass-card stat-card">
-                    <div class="stat-icon" style="background: rgba(241, 196, 15, 0.1); color: var(--accent);">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h4>Horas de Vuelo</h4>
-                        <p>3,450</p>
-                    </div>
-                </div>
-            </section>
+                </section>
+            </div>
 
-            <!-- Main Content Area -->
-            <section class="glass-card content-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3>Contenido Reciente</h3>
-                    <button class="btn-premium btn-primary-premium" style="padding: 8px 20px; font-size: 0.9rem;">+ Nuevo Curso</button>
-                </div>
-                
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Nombre del Curso</th>
-                            <th>Instructor</th>
-                            <th>Estado</th>
-                            <th>Inscritos</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Introducción a la IA Educativa</strong></td>
-                            <td>Dra. Elena Peñaloza</td>
-                            <td><span class="badge badge-success">Activo</span></td>
-                            <td>342</td>
-                            <td><i class="fas fa-ellipsis-h" style="cursor: pointer; color: #ccc;"></i></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Matemática Galáctica 3.0</strong></td>
-                            <td>Prof. Marcos Sierra</td>
-                            <td><span class="badge badge-success">Activo</span></td>
-                            <td>128</td>
-                            <td><i class="fas fa-ellipsis-h" style="cursor: pointer; color: #ccc;"></i></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </section>
+            <!-- Otras vistas se cargarán aquí -->
+            <div id="legajos-view" class="view-section">
+                <section class="glass-card content-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Gestión de Legajos</h3>
+                        <button class="btn-premium btn-primary-premium">+ Nuevo Legajo</button>
+                    </div>
+                    <p>Carga inicial recomendada vía Excel para alumnos y docentes.</p>
+                    <table class="data-table">
+                        <thead><tr><th>DNI</th><th>Nombre</th><th>Rol</th><th>Estado</th></tr></thead>
+                        <tbody>
+                            <tr><td>1001</td><td>Alumno Ejemplo 1</td><td>Alumno</td><td><span class="badge badge-success">Regular</span></td></tr>
+                        </tbody>
+                    </table>
+                </section>
+            </div>
 
-            <script>
-                fetch('/api/user')
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.username) {
-                            document.getElementById('user-display-name').textContent = data.username;
-                            document.getElementById('user-role').textContent = data.username.charAt(0).toUpperCase() + data.username.slice(1);
-                            document.getElementById('user-avatar').textContent = data.username.charAt(0).toUpperCase();
-                            document.getElementById('user-email').textContent = data.username + '@nodoandino.com';
-                        }
-                    })
-                    .catch(err => console.error('Error fetching user:', err));
-            </script>
+            <div id="notas-view" class="view-section">
+                <section class="glass-card content-card">
+                    <h3>Carga de Notas y Seguimiento</h3>
+                    <p>Selecciona un curso y materia para comenzar.</p>
+                </section>
+            </div>
+
+            <div id="boletin-view" class="view-section">
+                <section class="glass-card content-card" style="text-align: center;">
+                    <h2 style="color: var(--primary);">Boletín Trimestral</h2>
+                    <p>Ciclo Lectivo 2026</p>
+                    <div style="margin: 40px auto; max-width: 600px; padding: 20px; border: 2px solid #eee; border-radius: 10px;">
+                        <table class="data-table">
+                            <thead><tr><th>Materia</th><th>1er Trim</th><th>2do Trim</th><th>3er Trim</th></tr></thead>
+                            <tbody>
+                                <tr><td>Matemática</td><td>8</td><td>-</td><td>-</td></tr>
+                                <tr><td>Lengua</td><td>9</td><td>-</td><td>-</td></tr>
+                            </tbody>
+                        </table>
+                        <button class="btn-premium btn-primary-premium" style="margin-top: 20px;" onclick="window.print()"><i class="fas fa-print"></i> Imprimir Boletín</button>
+                    </div>
+                </section>
+            </div>
+
         </main>
     </div>
+
+    <script>
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString();
+
+        // Cargar datos del usuario
+        fetch('/api/user')
+            .then(res => res.json())
+            .then(user => {
+                document.getElementById('user-display-name').textContent = user.name;
+                document.getElementById('user-role-display').textContent = formatRole(user.role);
+                document.getElementById('user-dni-display').textContent = 'DNI: ' + user.dni;
+                document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
+                document.getElementById('view-title').textContent = 'Panel de ' + formatRole(user.role);
+
+                // Configurar Menú por Rol
+                if (user.role === 'admin_global') document.getElementById('menu-admin-global').style.display = 'block';
+                if (['director', 'secretario'].includes(user.role)) document.getElementById('menu-gestion').style.display = 'block';
+                if (user.role === 'docente') document.getElementById('menu-docente').style.display = 'block';
+                if (['alumno', 'tutor'].includes(user.role)) document.getElementById('menu-alumno').style.display = 'block';
+            });
+
+        // Cargar datos de la escuela
+        fetch('/api/entidad')
+            .then(res => res.json())
+            .then(entidad => {
+                document.getElementById('sidebar-school-name').textContent = entidad.nombre;
+                if (entidad.logo_url) {
+                    document.getElementById('sidebar-school-logo').innerHTML = `<img src="${entidad.logo_url}" alt="logo">`;
+                }
+            });
+
+        function showView(viewId) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            const view = document.getElementById(viewId + '-view');
+            if (view) view.classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function formatRole(role) {
+            const roles = {
+                'admin_global': 'Administrador Global',
+                'director': 'Director',
+                'secretario': 'Secretario',
+                'docente': 'Docente',
+                'alumno': 'Alumno',
+                'tutor': 'Tutor'
+            };
+            return roles[role] || role;
+        }
+    </script>
 </body>
 
 </html>

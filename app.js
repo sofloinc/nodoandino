@@ -4,37 +4,22 @@ const session = require('express-session');
 const path = require('path');
 const app = express();
 
-// Importamos la base de datos (asegúrate que database.js maneje su propio catch o lo manejamos aquí)
-const { User, mongoose } = require('./database');
+// Usamos la base de datos PEI en MongoDB Atlas
+const { User, Entidad, Curso, Materia, mongoose } = require('./database');
 
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'nodo-andino-secret-key',
+    secret: process.env.SESSION_SECRET || 'pei-secret-key-2026',
     resave: false,
     saveUninitialized: false,
-    cookie: {
-        secure: false, // En Render (HTTP) debe ser false, si usas HTTPS real sería true
-        maxAge: 3600000 // 1 hora de sesión
-    }
+    cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }
 }));
 
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// --- NUEVA RUTA DE DIAGNÓSTICO ---
-// Entra a tu-web.onrender.com/health para saber si la DB está viva
-app.get('/health', (req, res) => {
-    const state = mongoose.connection.readyState;
-    const states = ["Desconectado", "Conectado", "Conectando", "Desconectando"];
-    res.json({
-        status: "OK",
-        database: states[state],
-        env_mongo: process.env.MONGO_URI ? "Cargada" : "FALTANTE"
-    });
-});
-
 const isAuthenticated = (req, res, next) => {
-    if (req.session.userId) return next();
+    if (req.session.userDni) return next();
     res.redirect('/');
 };
 
@@ -42,27 +27,29 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Login por DNI (MongoDB)
 app.post('/login', async (req, res) => {
-    const { usuario, password } = req.body;
-
+    const { dni, password } = req.body;
+    
     try {
-        // Verificamos primero si la base de datos está conectada
         if (mongoose.connection.readyState !== 1) {
-            return res.status(503).send('La base de datos no está lista. Reintenta en unos segundos.');
+            return res.status(503).send('Base de datos no disponible');
         }
 
-        const user = await User.findOne({ usuario, password });
-
+        const user = await User.findOne({ dni, password });
+        
         if (user) {
-            req.session.userId = user._id;
-            req.session.username = user.usuario;
+            req.session.userDni = user.dni;
+            req.session.userName = user.nombre_completo;
+            req.session.userRole = user.rol;
+            req.session.entidadId = user.entidad_id;
             res.redirect('/dashboard');
         } else {
-            res.send('Acceso denegado. <a href="/">Volver</a>');
+            res.send('Credenciales incorrectas. <a href="/">Volver</a>');
         }
     } catch (err) {
-        console.error('❌ Error en el proceso de login:', err.message);
-        res.status(500).send('Error interno al intentar loguear. Revisa los logs de Render.');
+        console.error('Error login:', err);
+        res.status(500).send('Error interno');
     }
 });
 
@@ -70,21 +57,31 @@ app.get('/dashboard', isAuthenticated, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
+app.get('/api/user', isAuthenticated, (req, res) => {
+    res.json({
+        dni: req.session.userDni,
+        name: req.session.userName,
+        role: req.session.userRole,
+        entidadId: req.session.entidadId
+    });
+});
+
+app.get('/api/entidad', isAuthenticated, async (req, res) => {
+    try {
+        if (!req.session.entidadId) return res.json({ nombre: 'PEI Global' });
+        const entidad = await Entidad.findById(req.session.entidadId);
+        res.json(entidad);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al obtener escuela' });
+    }
+});
+
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/');
 });
 
-app.get('/api/user', isAuthenticated, (req, res) => {
-    res.json({ username: req.session.username });
-});
-
-// --- MANEJO DE RUTAS NO ENCONTRADAS (404) ---
-app.use((req, res) => {
-    res.status(404).send('Lo siento, no encontramos esa página.');
-});
-
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Servidor funcionando en puerto ${PORT}`);
+    console.log(`🚀 PEI Platform (MongoDB Atlas) en puerto ${PORT}`);
 });

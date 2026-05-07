@@ -4,10 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="NodoAndino - Plataforma Educativa Integral. Innovación y aprendizaje en la cordillera.">
-    <title>NodoAndino | Plataforma Educativa</title>
+    <meta name="description" content="PEI - Plataforma Educativa Integral. Gestión inteligente para instituciones educativas.">
+    <title>PEI | Plataforma Educativa Integral</title>
     <link rel="stylesheet" href="estilos.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
+    <style>
+        .social-links a { font-size: 1.5rem; margin: 0 10px; color: white; transition: 0.3s; }
+        .social-links a:hover { color: var(--accent); }
+        .pricing-badge { background: var(--accent); color: var(--dark); padding: 5px 15px; border-radius: 20px; font-weight: 800; display: inline-block; margin-bottom: 10px; }
+        .legal-footer { font-size: 0.8rem; opacity: 0.7; margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; }
+    </style>
 </head>
 
 <body>
@@ -15,97 +21,99 @@
     <nav class="glass-nav">
         <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
             <div class="logo" style="font-weight: 800; font-size: 1.5rem; color: var(--primary);">
-                NODO<span style="color: var(--secondary);">ANDINO</span>
+                PEI<span style="color: var(--secondary);"> INTEGRAL</span>
             </div>
             <div class="nav-links">
-                <a href="#servicios" style="margin-right: 20px; text-decoration: none; color: var(--dark); font-weight: 600;">Servicios</a>
-                <a href="#acceso" class="btn-premium btn-primary-premium" style="padding: 8px 20px;">Acceso Admin</a>
+                <a href="#demo" style="margin-right: 20px; text-decoration: none; color: var(--dark); font-weight: 600;">Solicitar Demo</a>
+                <a href="#acceso" class="btn-premium btn-primary-premium">Ingresar</a>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <header class="bg-gradient-andean hero">
+    <header class="bg-gradient-andean hero" style="min-height: 90vh;">
         <div class="container">
-            <h1>Conectando Saberes, <br>Elevando Futuros</h1>
-            <p>NodoAndino es el ecosistema educativo digital diseñado para potenciar el aprendizaje colaborativo en toda la región. Innovación, tecnología y pedagogía de vanguardia.</p>
+            <div class="pricing-badge">OFERTA LANZAMIENTO</div>
+            <h1 style="margin-top: 0;">Gestión Educativa <br><span style="color: var(--accent);">de Próxima Generación</span></h1>
+            <p>PEI es la solución definitiva para niveles Inicial, Primaria, Secundaria y Terciaria. Centraliza legajos, notas, asistencias y comunicación en un solo entorno profesional.</p>
+            <h2 style="color: white; margin-bottom: 30px;">$150.000 <small style="font-size: 1rem; opacity: 0.8;">ARS / mes</small></h2>
             <div class="hero-btns">
-                <a href="#servicios" class="btn-premium btn-primary-premium">Explorar Servicios</a>
-                <a href="#acceso" class="btn-premium btn-outline-premium" style="margin-left: 15px;">Iniciar Sesión</a>
+                <a href="#demo" class="btn-premium btn-primary-premium">Solicitar Demo Gratis</a>
+                <a href="#acceso" class="btn-premium btn-outline-premium" style="margin-left: 15px;">Acceso con DNI</a>
             </div>
         </div>
     </header>
 
-    <!-- Services Section -->
-    <section id="servicios" class="section-padding">
-        <div class="section-title">
-            <h2>Nuestros Servicios</h2>
-            <div class="underline"></div>
-        </div>
-        <div class="services-grid">
-            <div class="glass-card service-card">
-                <div class="service-icon"><i class="fas fa-graduation-cap"></i></div>
-                <h3>Aula Virtual</h3>
-                <p>Plataforma interactiva para clases en vivo y material de estudio centralizado.</p>
-            </div>
-            <div class="glass-card service-card">
-                <div class="service-icon"><i class="fas fa-gamepad"></i></div>
-                <h3>Gamificación</h3>
-                <p>Estrategias de aprendizaje basadas en juegos para motivar a los estudiantes.</p>
-            </div>
-            <div class="glass-card service-card">
-                <div class="service-icon"><i class="fas fa-chart-line"></i></div>
-                <h3>Seguimiento IA</h3>
-                <p>Análisis avanzado del progreso educativo mediante inteligencia artificial.</p>
+    <!-- Social & Branding -->
+    <section class="section-padding" style="background: var(--dark); color: white; text-align: center;">
+        <div class="container">
+            <h3>Desarrollado por <span style="color: var(--secondary);">Pugliese Nicolas</span></h3>
+            <p style="opacity: 0.8;">Patrocinado por <strong>Sapiencia Virtual</strong></p>
+            <div class="social-links" style="margin: 30px 0;">
+                <a href="https://www.youtube.com/@sapienciavirtual" target="_blank"><i class="fab fa-youtube"></i></a>
+                <a href="https://www.instagram.com/sapienciavirtualbariloche/" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.tiktok.com/@sapienciavirtual" target="_blank"><i class="fab fa-tiktok"></i></a>
+                <a href="https://www.facebook.com/profile.php?id=100067019960550" target="_blank"><i class="fab fa-facebook"></i></a>
             </div>
         </div>
     </section>
 
-    <!-- Admin Access Section -->
-    <section id="acceso" class="section-padding admin-section">
+    <!-- Login Section -->
+    <section id="acceso" class="section-padding">
         <div class="section-title">
-            <h2>Acceso Administrativo</h2>
-            <p>Ingresa tus credenciales para gestionar el nodo</p>
+            <h2>Acceso a la Plataforma</h2>
+            <p>Ingresa con tu DNI y contraseña</p>
             <div class="underline"></div>
         </div>
         
         <div class="glass-card login-form-container">
             <form action="/login" method="POST">
                 <div class="form-group">
-                    <label for="usuario">Usuario</label>
-                    <input type="text" id="usuario" name="usuario" class="form-control-premium" placeholder="admin" required>
+                    <label>DNI</label>
+                    <input type="text" name="dni" class="form-control-premium" placeholder="Tu número de documento" required>
                 </div>
                 <div class="form-group">
-                    <label for="password">Contraseña</label>
-                    <input type="password" id="password" name="password" class="form-control-premium" placeholder="••••••••" required>
+                    <label>Contraseña</label>
+                    <input type="password" name="password" class="form-control-premium" placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="btn-premium btn-primary-premium" style="width: 100%; font-size: 1.1rem; margin-top: 10px;">
+                <button type="submit" class="btn-premium btn-primary-premium" style="width: 100%; margin-top: 10px;">
                     Entrar al Sistema
                 </button>
+            </form>
+            <p style="margin-top: 20px; text-align: center; font-size: 0.9rem; color: #888;">
+                ¿Olvidaste tu contraseña? Contacta a tu institución.
+            </p>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="section-padding" style="background: #eee;">
+        <div class="container" style="max-width: 800px; text-align: center;">
+            <h2>Solicita una Charla o Demo</h2>
+            <p>Descubre cómo PEI puede transformar tu institución. Agenda una reunión personalizada.</p>
+            <form class="glass-card" style="margin-top: 30px; padding: 40px; text-align: left;">
+                <div class="form-group"><label>Nombre del Colegio</label><input type="text" class="form-control-premium" required></div>
+                <div class="form-group"><label>Email de Contacto</label><input type="email" class="form-control-premium" required></div>
+                <button type="button" class="btn-premium btn-primary-premium" style="width: 100%;">Enviar Solicitud</button>
             </form>
         </div>
     </section>
 
-    <footer>
+    <footer style="background: var(--dark); color: white; padding: 60px 20px; text-align: center;">
         <div class="container">
-            <p>&copy; 2026 NodoAndino. Todos los derechos reservados.</p>
-            <div style="margin-top: 15px; opacity: 0.6; font-size: 0.9rem;">
-                Diseñado para la excelencia educativa.
+            <div class="social-links" style="margin-bottom: 30px;">
+                <a href="#"><i class="fab fa-youtube"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-tiktok"></i></a>
+            </div>
+            <p>&copy; 2026 PEI Platform. Todos los derechos reservados.</p>
+            <div class="legal-footer">
+                <strong>AVISO LEGAL Y COMPROMISO DE PRIVACIDAD:</strong><br>
+                Nos comprometemos formalmente a no hacer difusión, venta o uso indebido de los datos contenidos en esta plataforma. 
+                La seguridad de la comunidad educativa es nuestra prioridad. Sapiencia Virtual garantiza la confidencialidad de los legajos.
             </div>
         </div>
     </footer>
-
-    <script>
-        // Smooth scroll
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({
-                    behavior: 'smooth'
-                });
-            });
-        });
-    </script>
 </body>
 
 </html>
