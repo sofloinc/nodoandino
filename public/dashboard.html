@@ -12,7 +12,6 @@
         .view-section.active { display: block; }
         .sidebar-brand { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
         .school-logo { width: 80px; height: 80px; border-radius: 50%; background: white; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .school-logo img { width: 100%; height: auto; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
         .modal-card { width: 500px; padding: 30px; }
     </style>
@@ -24,20 +23,16 @@
         <aside class="sidebar">
             <div class="sidebar-brand">
                 <div class="school-logo" id="sidebar-school-logo"><i class="fas fa-school" style="color: var(--primary); font-size: 2rem;"></i></div>
-                <div id="sidebar-school-name" style="font-weight: 700; color: white;">Cargando...</div>
+                <div id="sidebar-school-name" style="font-weight: 700; color: white;">PEI Platform</div>
             </div>
             <nav class="nav-menu">
                 <a href="#" class="nav-item active" onclick="showView('home')"><i class="fas fa-home"></i> Inicio</a>
-                
                 <div id="menu-admin" style="display: none;">
                     <a href="#" class="nav-item" onclick="showView('legajos')"><i class="fas fa-address-card"></i> Legajos</a>
-                    <a href="#" class="nav-item" onclick="showView('config')"><i class="fas fa-cog"></i> Institución</a>
                 </div>
-
                 <div id="menu-docente" style="display: none;">
                     <a href="#" class="nav-item" onclick="showView('academico')"><i class="fas fa-clipboard-check"></i> Asistencia y Notas</a>
                 </div>
-
                 <div id="menu-alumno" style="display: none;">
                     <a href="#" class="nav-item" onclick="showView('boletin')"><i class="fas fa-file-invoice"></i> Mi Boletín</a>
                 </div>
@@ -61,14 +56,12 @@
             <!-- VISTA: HOME -->
             <div id="home-view" class="view-section active">
                 <section class="stats-grid">
-                    <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(42, 75, 124, 0.1); color: var(--primary);"><i class="fas fa-users"></i></div><div class="stat-info"><h4>Alumnos</h4><p>1,284</p></div></div>
-                    <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(230, 126, 34, 0.1); color: var(--secondary);"><i class="fas fa-chalkboard"></i></div><div class="stat-info"><h4>Cursos</h4><p>42</p></div></div>
+                    <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(42, 75, 124, 0.1); color: var(--primary);"><i class="fas fa-users"></i></div><div class="stat-info"><h4>Alumnos</h4><p id="stat-alumnos">40</p></div></div>
+                    <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(230, 126, 34, 0.1); color: var(--secondary);"><i class="fas fa-chalkboard"></i></div><div class="stat-info"><h4>Cursos</h4><p id="stat-cursos">4</p></div></div>
                 </section>
                 <div class="glass-card content-card">
-                    <h3>Avisos Recientes</h3>
-                    <div style="padding: 15px; border-left: 5px solid var(--secondary); background: #fff;">
-                        <strong>Importante:</strong> Carga de notas trimestrales habilitada hasta el 15/06.
-                    </div>
+                    <h3>Avisos de la Institución</h3>
+                    <div id="noticias-list" style="margin-top: 15px;"></div>
                 </div>
             </div>
 
@@ -76,57 +69,40 @@
             <div id="legajos-view" class="view-section">
                 <section class="glass-card content-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>Gestión de Comunidad Educativa</h3>
-                        <div style="display: flex; gap: 10px;">
-                            <button class="btn-premium btn-outline-premium" onclick="openModal('modal-excel')" style="color: var(--primary); border-color: var(--primary);"><i class="fas fa-file-excel"></i> Importar Excel</button>
-                            <button class="btn-premium btn-primary-premium">+ Nuevo Legajo</button>
-                        </div>
+                        <h3>Comunidad Educativa</h3>
+                        <button class="btn-premium btn-outline-premium" onclick="openModal('modal-excel')"><i class="fas fa-file-excel"></i> Importar Excel</button>
                     </div>
                     <table class="data-table">
-                        <thead><tr><th>DNI</th><th>Nombre</th><th>Rol</th><th>Documentos</th><th>Acciones</th></tr></thead>
+                        <thead><tr><th>DNI</th><th>Nombre</th><th>Rol</th><th>Acciones</th></tr></thead>
                         <tbody id="users-table-body"></tbody>
                     </table>
                 </section>
             </div>
 
-            <!-- VISTA: ACADÉMICO (Docente) -->
-            <div id="academico-view" class="view-section">
-                <section class="glass-card content-card">
-                    <h3>Carga de Asistencia y Notas</h3>
-                    <div id="materias-list" class="stats-grid" style="margin-top: 20px;"></div>
-                </section>
-            </div>
-
-            <!-- VISTA: BOLETÍN (Alumno) -->
+            <!-- VISTA: BOLETÍN -->
             <div id="boletin-view" class="view-section">
                 <section class="glass-card content-card" style="text-align: center;">
-                    <h2 style="color: var(--primary);">Informe de Seguimiento y Boletín</h2>
-                    <div style="margin: 30px auto; max-width: 700px; padding: 40px; border: 1px dashed #ccc; border-radius: 15px;">
+                    <h2 style="color: var(--primary);">Boletín Oficial de Calificaciones</h2>
+                    <div style="margin: 30px auto; max-width: 700px; padding: 40px; border: 1px solid #eee; border-radius: 15px; background: white;">
                         <table class="data-table">
-                            <thead><tr><th>Materia</th><th>Seguimiento</th><th>1er Trim</th><th>Final</th></tr></thead>
-                            <tbody>
-                                <tr><td>Matemática</td><td>Muy Bueno</td><td>8</td><td>-</td></tr>
-                                <tr><td>Lengua</td><td>Excelente</td><td>9</td><td>-</td></tr>
-                            </tbody>
+                            <thead><tr><th>Materia</th><th>1er Trim</th><th>2do Trim</th><th>3er Trim</th></tr></thead>
+                            <tbody id="boletin-table-body"></tbody>
                         </table>
-                        <button class="btn-premium btn-primary-premium" style="margin-top: 30px;" onclick="window.print()"><i class="fas fa-print"></i> Imprimir Informe</button>
+                        <button class="btn-premium btn-primary-premium" style="margin-top: 30px;" onclick="window.print()"><i class="fas fa-print"></i> Imprimir Boletín</button>
                     </div>
                 </section>
             </div>
         </main>
     </div>
 
-    <!-- MODAL: EXCEL -->
+    <!-- MODAL EXCEL -->
     <div id="modal-excel" class="modal">
         <div class="glass-card modal-card">
-            <h3>Importación Masiva</h3>
-            <p style="margin: 15px 0; font-size: 0.9rem;">Sube una planilla con columnas: <strong>DNI, Nombre, Password, Rol</strong>.</p>
-            <form id="excelForm">
-                <input type="file" id="excelFile" accept=".xlsx, .xls" required style="margin-bottom: 20px;">
-                <div style="display: flex; gap: 10px;">
-                    <button type="button" class="btn-premium btn-outline-premium" onclick="closeModal('modal-excel')">Cancelar</button>
-                    <button type="submit" class="btn-premium btn-primary-premium">Procesar Excel</button>
-                </div>
+            <h3>Importar Alumnos</h3>
+            <p>Sube tu archivo .xlsx</p>
+            <form id="excelForm"><input type="file" id="excelFile" required><br><br>
+                <button type="submit" class="btn-premium btn-primary-premium">Procesar</button>
+                <button type="button" onclick="closeModal('modal-excel')" class="btn-premium btn-outline-premium">Cancelar</button>
             </form>
         </div>
     </div>
@@ -139,7 +115,7 @@
             document.getElementById(viewId + '-view').classList.add('active');
             event.currentTarget.classList.add('active');
             if(viewId === 'legajos') loadUsers();
-            if(viewId === 'academico') loadMaterias();
+            if(viewId === 'boletin') loadBoletin();
         }
 
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
@@ -150,55 +126,34 @@
             document.getElementById('user-role-display').textContent = user.role.toUpperCase();
             document.getElementById('user-dni-display').textContent = 'DNI: ' + user.dni;
             document.getElementById('user-avatar').textContent = user.name.charAt(0);
-            
-            if (['admin_global', 'director', 'secretario'].includes(user.role)) document.getElementById('menu-admin').style.display = 'block';
-            if (user.role === 'docente') document.getElementById('menu-docente').style.display = 'block';
-            if (user.role === 'alumno') document.getElementById('menu-alumno').style.display = 'block';
+            if(['admin_global', 'director', 'secretario'].includes(user.role)) document.getElementById('menu-admin').style.display = 'block';
+            if(user.role === 'docente') document.getElementById('menu-docente').style.display = 'block';
+            if(user.role === 'alumno') document.getElementById('menu-alumno').style.display = 'block';
         });
 
-        fetch('/api/entidad').then(res => res.json()).then(ent => {
-            document.getElementById('sidebar-school-name').textContent = ent.nombre;
+        fetch('/api/noticias').then(res => res.json()).then(news => {
+            document.getElementById('noticias-list').innerHTML = news.map(n => `
+                <div style="padding: 15px; border-left: 4px solid var(--secondary); background: #f9f9f9; margin-bottom: 10px;">
+                    <strong>${n.titulo}</strong><br><small>${new Date(n.fecha).toLocaleDateString()}</small><p>${n.contenido}</p>
+                </div>
+            `).join('');
         });
 
         function loadUsers() {
             fetch('/api/admin/users').then(res => res.json()).then(users => {
-                const tbody = document.getElementById('users-table-body');
-                tbody.innerHTML = users.map(u => `
-                    <tr>
-                        <td>${u.dni}</td>
-                        <td><strong>${u.nombre_completo}</strong></td>
-                        <td><span class="badge badge-success">${u.rol}</span></td>
-                        <td>${u.documentos?.length || 0} archivos</td>
-                        <td><button onclick="uploadDoc('${u.dni}')" class="btn-premium btn-outline-premium" style="padding:5px 10px; font-size:0.7rem;"><i class="fas fa-upload"></i> Doc</button></td>
-                    </tr>
+                document.getElementById('users-table-body').innerHTML = users.map(u => `
+                    <tr><td>${u.dni}</td><td>${u.nombre_completo}</td><td>${u.rol}</td><td><i class="fas fa-edit"></i></td></tr>
                 `).join('');
             });
         }
 
-        function loadMaterias() {
-            fetch('/api/materias').then(res => res.json()).then(materias => {
-                const list = document.getElementById('materias-list');
-                list.innerHTML = materias.map(m => `
-                    <div class="glass-card stat-card" style="cursor:pointer;" onclick="Swal.fire('Gestión de Notas', 'Abriendo ${m.nombre} de ${m.curso_id.nombre}', 'info')">
-                        <div class="stat-info"><h4>${m.curso_id.nombre}</h4><p>${m.nombre}</p></div>
-                    </div>
+        function loadBoletin() {
+            fetch('/api/boletin').then(res => res.json()).then(notas => {
+                document.getElementById('boletin-table-body').innerHTML = notas.map(n => `
+                    <tr><td>${n.materia_id.nombre}</td><td>${n.valor}</td><td>-</td><td>-</td></tr>
                 `).join('');
             });
         }
-
-        document.getElementById('excelForm').onsubmit = function(e) {
-            e.preventDefault();
-            const formData = new FormData();
-            formData.append('excel', document.getElementById('excelFile').files[0]);
-            
-            fetch('/api/admin/import-excel', { method: 'POST', body: formData })
-                .then(res => res.json())
-                .then(data => {
-                    Swal.fire('Éxito', data.message, 'success');
-                    closeModal('modal-excel');
-                    loadUsers();
-                });
-        };
     </script>
 </body>
 

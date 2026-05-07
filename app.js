@@ -7,9 +7,9 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const app = express();
 
-const { User, Entidad, Curso, Materia, mongoose } = require('./database');
+const { User, Entidad, Curso, Materia, Nota, Noticia, mongoose } = require('./database');
 
-// Configuración de Multer para subida de archivos
+// Configuración de Multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/legajos/'),
     filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
@@ -34,11 +34,9 @@ const isAuthenticated = (req, res, next) => {
 };
 
 const isAdmin = (req, res, next) => {
-    if (['admin_global', 'director'].includes(req.session.userRole)) return next();
+    if (['admin_global', 'director', 'secretario'].includes(req.session.userRole)) return next();
     res.status(403).send('No autorizado');
 };
-
-// --- RUTAS DE LOGIN Y DASHBOARD ---
 
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
@@ -62,8 +60,7 @@ app.post('/login', async (req, res) => {
 
 app.get('/dashboard', isAuthenticated, (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
 
-// --- API DE USUARIO Y ENTIDAD ---
-
+// API USUARIO
 app.get('/api/user', isAuthenticated, (req, res) => {
     res.json({ dni: req.session.userDni, name: req.session.userName, role: req.session.userRole, entidadId: req.session.entidadId });
 });
@@ -74,61 +71,32 @@ app.get('/api/entidad', isAuthenticated, async (req, res) => {
     res.json(entidad);
 });
 
-// --- GESTIÓN DE LEGAJOS ---
+// API ACADÉMICA
+app.get('/api/materias', isAuthenticated, async (req, res) => {
+    let filter = {};
+    if (req.session.userRole === 'docente') filter.docente_dni = req.session.userDni;
+    if (req.session.entidadId && req.session.userRole !== 'admin_global') {
+        // En un caso real filtraríamos por entidad_id a través de curso_id
+    }
+    const materias = await Materia.find(filter).populate('curso_id');
+    res.json(materias);
+});
+
+app.get('/api/boletin', isAuthenticated, async (req, res) => {
+    const notas = await Nota.find({ alumno_dni: req.session.userDni }).populate('materia_id');
+    res.json(notas);
+});
+
+app.get('/api/noticias', isAuthenticated, async (req, res) => {
+    const filter = req.session.entidadId ? { entidad_id: req.session.entidadId } : {};
+    const noticias = await Noticia.find(filter).sort({ fecha: -1 });
+    res.json(noticias);
+});
 
 app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     const filter = req.session.userRole === 'admin_global' ? {} : { entidad_id: req.session.entidadId };
     const users = await User.find(filter).sort({ nombre_completo: 1 });
     res.json(users);
-});
-
-app.post('/api/admin/users/upload-doc/:dni', isAuthenticated, isAdmin, upload.single('documento'), async (req, res) => {
-    // Aquí se guardaría la referencia del archivo en el legajo del usuario
-    res.json({ message: 'Documento subido con éxito', file: req.file.filename });
-});
-
-// --- IMPORTACIÓN EXCEL ---
-
-app.post('/api/admin/import-excel', isAuthenticated, isAdmin, multer({ dest: 'uploads/excel/' }).single('excel'), async (req, res) => {
-    try {
-        const workbook = xlsx.readFile(req.file.path);
-        const sheetName = workbook.SheetNames[0];
-        const data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
-        for (let row of data) {
-            // Se asume columnas: DNI, Nombre, Password, Rol
-            await User.findOneAndUpdate(
-                { dni: row.DNI.toString() },
-                { 
-                    dni: row.DNI.toString(),
-                    nombre_completo: row.Nombre,
-                    password: row.Password.toString(),
-                    rol: row.Rol || 'alumno',
-                    entidad_id: req.session.entidadId
-                },
-                { upsert: true }
-            );
-        }
-        fs.unlinkSync(req.file.path);
-        res.json({ message: `Importados ${data.length} registros con éxito.` });
-    } catch (err) {
-        res.status(500).json({ error: 'Error al procesar Excel' });
-    }
-});
-
-// --- ACADÉMICO ---
-
-app.get('/api/cursos', isAuthenticated, async (req, res) => {
-    const filter = req.session.entidadId ? { entidad_id: req.session.entidadId } : {};
-    const cursos = await Curso.find(filter);
-    res.json(cursos);
-});
-
-app.get('/api/materias', isAuthenticated, async (req, res) => {
-    let filter = {};
-    if (req.session.userRole === 'docente') filter.docente_dni = req.session.userDni;
-    const materias = await Materia.find(filter).populate('curso_id');
-    res.json(materias);
 });
 
 app.get('/logout', (req, res) => {
@@ -137,4 +105,4 @@ app.get('/logout', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 PEI Platform Premium activa en puerto ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 PEI Masivo activo en puerto ${PORT}`));
