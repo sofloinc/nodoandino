@@ -1,11 +1,11 @@
 
-app.use(express.static('public')); // Esto permite que Node "vea" tus archivos HTML y CSS
+
 const express = require('express');
 const session = require('express-session');
 const path = require('path'); // <--- ¡ESTA LÍNEA ES VITAL!
 const app = express();
 
-
+app.use(express.static('public')); // Esto permite que Node "vea" tus archivos HTML y CSS
 // Para que Node pueda leer los datos de los formularios (como $_POST en PHP)
 app.use(express.urlencoded({ extended: true }));
 
