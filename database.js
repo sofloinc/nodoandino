@@ -24,6 +24,12 @@ const EntidadSchema = new mongoose.Schema({
     configuracion: Object
 });
 
+const CarreraSchema = new mongoose.Schema({
+    nombre: { type: String, required: true },
+    entidad_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Entidad' },
+    duracion_anios: Number
+});
+
 const UserSchema = new mongoose.Schema({
     dni: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -31,12 +37,14 @@ const UserSchema = new mongoose.Schema({
     rol: { type: String, required: true }, 
     entidad_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Entidad' },
     avatar_url: { type: String, default: 'https://cdn-icons-png.flaticon.com/512/147/147142.png' },
+    estado_academico: { type: String, default: 'Activo' }, // Activo, Egresado, Suspendido
     documentos: [String]
 });
 
 const CursoSchema = new mongoose.Schema({
     nombre: String, 
     nivel: String, 
+    carrera_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Carrera' },
     entidad_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Entidad' }
 });
 
@@ -64,6 +72,13 @@ const NotaSchema = new mongoose.Schema({
     fecha: { type: Date, default: Date.now }
 });
 
+const AsistenciaSchema = new mongoose.Schema({
+    alumno_dni: String,
+    materia_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Materia' },
+    estado: { type: String, enum: ['Presente', 'Ausente', 'Tarde', 'Justificado'] },
+    fecha: { type: Date, default: Date.now }
+});
+
 const NoticiaSchema = new mongoose.Schema({
     titulo: String,
     contenido: String,
@@ -79,6 +94,8 @@ const Materia = mongoose.model('Materia', MateriaSchema);
 const Inscripcion = mongoose.model('Inscripcion', InscripcionSchema);
 const Nota = mongoose.model('Nota', NotaSchema);
 const Noticia = mongoose.model('Noticia', NoticiaSchema);
+const Asistencia = mongoose.model('Asistencia', AsistenciaSchema);
+const Carrera = mongoose.model('Carrera', CarreraSchema);
 
 async function seedDemo() {
     try {
@@ -142,4 +159,4 @@ async function seedDemo() {
     }
 }
 
-module.exports = { Entidad, User, Curso, Materia, Inscripcion, Nota, Noticia, mongoose };
+module.exports = { Entidad, User, Curso, Materia, Inscripcion, Nota, Noticia, Asistencia, Carrera, mongoose };

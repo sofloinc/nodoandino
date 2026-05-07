@@ -7,7 +7,7 @@ const xlsx = require('xlsx');
 const fs = require('fs');
 const app = express();
 
-const { User, Entidad, Curso, Materia, Inscripcion, Nota, Noticia, mongoose } = require('./database');
+const { User, Entidad, Curso, Materia, Inscripcion, Nota, Noticia, Asistencia, Carrera, mongoose } = require('./database');
 
 // Configuración de Multer
 const storage = multer.diskStorage({
@@ -128,6 +128,23 @@ app.post('/api/notas', isAuthenticated, async (req, res) => {
     }
 });
 
+app.post('/api/asistencia', isAuthenticated, async (req, res) => {
+    try {
+        const { materia_id, registros } = req.body; // registros = [{dni, estado}]
+        for (let reg of registros) {
+            await new Asistencia({ alumno_dni: reg.dni, materia_id, estado: reg.estado }).save();
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Error' });
+    }
+});
+
+app.get('/api/asistencia/:materiaId', isAuthenticated, async (req, res) => {
+    const asistencia = await Asistencia.find({ materia_id: req.params.materiaId }).sort({ fecha: -1 });
+    res.json(asistencia);
+});
+
 // API ADMINISTRATIVA
 app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     const filter = req.session.userRole === 'admin_global' ? {} : { entidad_id: req.session.entidadId };
@@ -180,6 +197,43 @@ app.get('/api/admin/cursos/:id/consolidado', isAuthenticated, isAdmin, async (re
         });
     }
     res.json({ materias: materias.map(m => m.nombre), consolidado });
+});
+
+app.get('/api/carreras', isAuthenticated, async (req, res) => {
+    const filter = req.session.entidadId ? { entidad_id: req.session.entidadId } : {};
+    const carreras = await Carrera.find(filter);
+    res.json(carreras);
+});
+
+app.post('/api/admin/carreras', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const carrera = await new Carrera({ ...req.body, entidad_id: req.session.entidadId }).save();
+        res.json(carrera);
+    } catch (err) {
+        res.status(500).json({ error: 'Error' });
+    }
+});
+
+app.post('/api/admin/promocionar', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const { curso_origen_id, curso_destino_id, es_egreso } = req.body;
+        const inscripciones = await Inscripcion.find({ curso_id: curso_origen_id, ciclo_lectivo: 2026 });
+        
+        for (let insc of inscripciones) {
+            if (es_egreso) {
+                await User.findOneAndUpdate({ dni: insc.alumno_dni }, { estado_academico: 'Egresado' });
+            } else {
+                await new Inscripcion({
+                    alumno_dni: insc.alumno_dni,
+                    curso_id: curso_destino_id,
+                    ciclo_lectivo: 2027
+                }).save();
+            }
+        }
+        res.json({ success: true, count: inscripciones.length });
+    } catch (err) {
+        res.status(500).json({ error: 'Error en la promoción' });
+    }
 });
 
 app.get('/logout', (req, res) => {
