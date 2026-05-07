@@ -38,4 +38,6 @@ async function seedAdmin() {
     }
 }
 
-module.exports = { User };
+
+// En database.js al final:
+module.exports = { User, mongoose };
