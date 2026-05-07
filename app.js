@@ -147,6 +147,32 @@ app.get('/api/asistencia/:materiaId', isAuthenticated, async (req, res) => {
 });
 
 // API ADMINISTRATIVA
+app.get('/api/admin/stats', isAuthenticated, isAdmin, async (req, res) => {
+    const entId = req.session.entidadId;
+    const alumnos = await User.countDocuments({ entidad_id: entId, rol: 'alumno' });
+    const docentes = await User.countDocuments({ entidad_id: entId, rol: 'docente' });
+    const carreras = await Carrera.countDocuments({ entidad_id: entId });
+    const cursos = await Curso.countDocuments({ entidad_id: entId });
+    res.json({ alumnos, docentes, carreras, cursos });
+});
+
+app.get('/api/admin/carreras/:id/detalles', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const carrera = await Carrera.findById(req.params.id);
+        const cursos = await Curso.find({ carrera_id: carrera._id });
+        const data = [];
+        for (let curso of cursos) {
+            const inscripciones = await Inscripcion.find({ curso_id: curso._id });
+            const alumnos = await User.find({ dni: { $in: inscripciones.map(i => i.alumno_dni) } });
+            const materias = await Materia.find({ curso_id: curso._id }).populate('docente_dni'); // Assuming we can link by DNI or similar
+            data.push({ curso, alumnos, materias });
+        }
+        res.json({ carrera, data });
+    } catch (err) {
+        res.status(500).json({ error: 'Error' });
+    }
+});
+
 app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     const filter = req.session.userRole === 'admin_global' ? {} : { entidad_id: req.session.entidadId };
     const users = await User.find(filter).sort({ nombre_completo: 1 });
