@@ -25,15 +25,17 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-brand">
-                <div class="school-logo" id="sidebar-school-logo"><img src="img/logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;"></div>
-                <div id="sidebar-school-name" style="font-weight: 700; color: white;">PEI Platform</div>
+                <div class="school-logo" id="sidebar-school-logo">
+                    <img src="img/logo.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+                <div id="sidebar-school-name" style="font-weight: 700; color: white;">NodoAndino PEI</div>
             </div>
             <nav class="nav-menu">
                 <a href="#" class="nav-item active" onclick="showView('home')"><i class="fas fa-home"></i> Inicio</a>
                 <div id="menu-gestion" style="display: none;">
                     <a href="#" class="nav-item" onclick="showView('carreras')"><i class="fas fa-graduation-cap"></i> Oferta Académica</a>
                     <a href="#" class="nav-item" onclick="showView('legajos')"><i class="fas fa-address-card"></i> Legajos</a>
-                    <a href="#" class="nav-item" onclick="showView('planificacion')"><i class="fas fa-calendar-alt"></i> Planificación</a>
+                    <a href="#" class="nav-item" onclick="showView('administracion')"><i class="fas fa-cog"></i> Administración</a>
                 </div>
                 <div id="menu-docente" style="display: none;"><a href="#" class="nav-item" onclick="showView('mis-cursos')"><i class="fas fa-chalkboard-teacher"></i> Mis Cursos</a></div>
                 <div id="menu-alumno" style="display: none;"><a href="#" class="nav-item" onclick="showView('mi-boletin')"><i class="fas fa-file-invoice"></i> Mi Boletín</a></div>
@@ -58,16 +60,18 @@
                     <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(42, 75, 124, 0.1); color: var(--primary);"><i class="fas fa-university"></i></div><div class="stat-info"><h4>Institución</h4><p id="inst-nombre">...</p></div></div>
                     <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(230, 126, 34, 0.1); color: var(--secondary);"><i class="fas fa-newspaper"></i></div><div class="stat-info"><h4>Noticias</h4><p id="news-count">0</p></div></div>
                 </section>
-                <div class="glass-card content-card"><h3>Novedades</h3><div id="noticias-list"></div></div>
+                <div class="glass-card content-card"><h3>Novedades de la Institución</h3><div id="noticias-list" style="margin-top:15px;"></div></div>
             </div>
 
             <div id="carreras-view" class="view-section">
                 <section class="glass-card content-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>Oferta Académica (Carreras / Talleres)</h3>
-                        <button class="btn-premium btn-primary-premium" onclick="openModal('modal-nueva-carrera')">+ Nueva Carrera</button>
+                        <h3>Carreras / Talleres</h3>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-premium btn-outline-premium" onclick="openModal('modal-nuevo-curso')">+ Crear Curso</button>
+                            <button class="btn-premium btn-primary-premium" onclick="openModal('modal-nueva-carrera')">+ Nueva Carrera</button>
+                        </div>
                     </div>
-                    <p style="margin-bottom:20px; color:var(--text-muted);">Haz clic en una carrera para gestionar su <strong>Plan de Estudios (Materias)</strong>.</p>
                     <div id="carreras-list" class="stats-grid"></div>
                 </section>
             </div>
@@ -78,19 +82,20 @@
                         <h3>Comunidad Educativa</h3>
                         <button class="btn-premium btn-primary-premium" onclick="openModal('modal-nuevo-legajo')">+ Nuevo Legajo</button>
                     </div>
-                    <table class="data-table"><thead><tr><th>DNI</th><th>Nombre Completo</th><th>Rol</th><th>Estado</th></tr></thead><tbody id="users-table-body"></tbody></table>
+                    <table class="data-table"><thead><tr><th>DNI</th><th>Nombre Completo</th><th>Rol</th><th>Inscripción</th></tr></thead><tbody id="users-table-body"></tbody></table>
                 </section>
             </div>
 
-            <div id="planificacion-view" class="view-section">
+            <div id="administracion-view" class="view-section">
                 <section class="glass-card content-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>Planificación de Cursos</h3>
+                        <h3>Administración de Cursos</h3>
                         <div style="display:flex; gap:10px;">
                             <button class="btn-premium btn-outline-premium" onclick="openModal('modal-promocion')"><i class="fas fa-forward"></i> Promoción</button>
                             <button class="btn-premium btn-primary-premium" onclick="openModal('modal-materia-admin')">+ Asignar Cátedra</button>
                         </div>
                     </div>
+                    <p style="margin-bottom:20px; color:var(--text-muted);">Acceso a Reportes de Notas Consolidados.</p>
                     <div id="cursos-grid" class="stats-grid"></div>
                 </section>
             </div>
@@ -105,40 +110,27 @@
         </main>
     </div>
 
-    <!-- MODAL: PLAN DE ESTUDIOS -->
-    <div id="modal-plan-estudios" class="modal">
-        <div class="glass-card modal-card">
-            <div class="modal-close-btn" onclick="closeModal('modal-plan-estudios')">&times;</div>
-            <h3 id="plan-titulo">Plan de Estudios</h3>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
-                <h4>Materias de la Carrera</h4>
-                <button class="btn-premium btn-primary-premium" onclick="openModal('modal-nueva-materia-plan')">+ Agregar Materia al Plan</button>
+    <!-- MODAL: CONSOLIDADO -->
+    <div id="modal-consolidado" class="modal">
+        <div class="glass-card modal-card" style="max-width:900px;">
+            <div class="modal-close-btn" onclick="closeModal('modal-consolidado')">&times;</div>
+            <h3 id="consolidado-titulo">Reporte de Notas</h3>
+            <div style="overflow-x:auto; margin-top:20px;">
+                <table class="data-table">
+                    <thead id="consolidado-thead"></thead>
+                    <tbody id="consolidado-tbody"></tbody>
+                </table>
             </div>
-            <table class="data-table" style="margin-top:20px;">
-                <thead><tr><th>Materia</th><th>Área / Tipo</th></tr></thead>
-                <tbody id="plan-materias-body"></tbody>
-            </table>
         </div>
     </div>
 
-    <!-- MODAL: NUEVA MATERIA AL PLAN -->
-    <div id="modal-nueva-materia-plan" class="modal">
-        <div class="glass-card modal-card" style="max-width:400px; z-index:2100;">
-            <div class="modal-close-btn" onclick="closeModal('modal-nueva-materia-plan')">&times;</div>
-            <h3>Agregar Materia al Plan</h3>
-            <form id="materiaPlanForm" style="margin-top:20px;">
-                <div class="form-group"><label>Nombre Materia</label><input type="text" id="plan-mat-nombre" class="form-control-premium" required></div>
-                <div class="form-group"><label>Área</label><input type="text" id="plan-mat-area" class="form-control-premium" placeholder="Ej: Técnica"></div>
-                <button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Guardar en el Plan</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- OTROS MODALES (Materia, Carrera, Legajo, Avatar, Promo) -->
+    <!-- MODALES EXISTENTES -->
     <div id="modal-nueva-carrera" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-nueva-carrera')">&times;</div><h3>Nueva Carrera</h3><form id="carreraForm" style="margin-top:20px;"><div class="form-group"><label>Nombre</label><input type="text" id="car-nombre" class="form-control-premium" required></div><div class="form-group"><label>Años</label><input type="number" id="car-duracion" class="form-control-premium" required></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Crear</button></form></div></div>
-    <div id="modal-nuevo-legajo" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-nuevo-legajo')">&times;</div><h3>Nuevo Legajo</h3><form id="userForm" style="margin-top:20px;"><div class="form-group"><label>DNI</label><input type="text" id="user-dni" class="form-control-premium" required></div><div class="form-group"><label>Nombre</label><input type="text" id="user-nombre" class="form-control-premium" required></div><div class="form-group"><label>Pass</label><input type="password" id="user-pass" class="form-control-premium" required></div><div class="form-group"><label>Rol</label><select id="user-rol" class="form-control-premium"><option value="alumno">Alumno</option><option value="docente">Docente</option><option value="administrativo">Administrativo</option></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Guardar</button></form></div></div>
-    <div id="modal-materia-admin" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-materia-admin')">&times;</div><h3>Asignar Cátedra</h3><form id="materiaForm" style="margin-top:20px;"><div class="form-group"><label>Nombre</label><input type="text" id="mat-nombre" class="form-control-premium" required></div><div class="form-group"><label>Curso</label><select id="mat-curso" class="form-control-premium"></select></div><div class="form-group"><label>Docente</label><select id="mat-docente" class="form-control-premium"></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Asignar</button></form></div></div>
-    <div id="modal-promocion" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-promocion')">&times;</div><h3>Promoción</h3><form id="promoForm"><div class="form-group"><label>Origen</label><select id="promo-origen" class="form-control-premium"></select></div><div class="form-group"><label>Destino</label><select id="promo-destino" class="form-control-premium"></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Promocionar</button></form></div></div>
+    <div id="modal-nuevo-curso" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-nuevo-curso')">&times;</div><h3>Nuevo Curso</h3><form id="cursoForm" style="margin-top:20px;"><div class="form-group"><label>Nombre</label><input type="text" id="cur-nombre" class="form-control-premium" required></div><div class="form-group"><label>Carrera</label><select id="cur-carrera" class="form-control-premium"></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Crear</button></form></div></div>
+    <div id="modal-inscripcion" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-inscripcion')">&times;</div><h3>Inscripción</h3><p id="insc-alumno-nombre"></p><form id="inscForm"><input type="hidden" id="insc-alumno-dni"><div class="form-group"><label>Curso</label><select id="insc-curso" class="form-control-premium"></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Inscribir</button></form></div></div>
+    <div id="modal-nuevo-legajo" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-nuevo-legajo')">&times;</div><h3>Nuevo Legajo</h3><form id="userForm" style="margin-top:20px;"><div class="form-group"><label>DNI</label><input type="text" id="user-dni" class="form-control-premium" required></div><div class="form-group"><label>Nombre</label><input type="text" id="user-nombre" class="form-control-premium" required></div><div class="form-group"><label>Rol</label><select id="user-rol" class="form-control-premium"><option value="alumno">Alumno</option><option value="docente">Docente</option></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Guardar</button></form></div></div>
+    <div id="modal-materia-admin" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-materia-admin')">&times;</div><h3>Asignar Materia</h3><form id="materiaForm"><div class="form-group"><label>Nombre</label><input type="text" id="mat-nombre" class="form-control-premium" required></div><div class="form-group"><label>Curso</label><select id="mat-curso" class="form-control-premium"></select></div><div class="form-group"><label>Docente</label><select id="mat-docente" class="form-control-premium"></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Asignar</button></form></div></div>
+    <div id="modal-promocion" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-promocion')">&times;</div><h3>Promoción</h3><form id="promoForm"><div class="form-group"><label>Origen</label><select id="promo-origen" class="form-control-premium"></select></div><div class="form-group"><label>Destino</label><select id="promo-destino" class="form-control-premium"></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Ejecutar</button></form></div></div>
     <div id="modal-avatar" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-avatar')">&times;</div><h3>Avatar</h3><div class="avatar-selector"><img src="https://cdn-icons-png.flaticon.com/512/147/147142.png" class="avatar-option" onclick="changeAvatar(this.src)"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="avatar-option" onclick="changeAvatar(this.src)"></div></div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -157,9 +149,9 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(viewId + '-view').classList.add('active');
             if(viewId === 'home') loadNoticias();
-            if(viewId === 'carreras') loadCarreras();
+            if(viewId === 'carreras') { loadCarreras(); prepareCursoModal(); }
             if(viewId === 'legajos') loadUsers();
-            if(viewId === 'planificacion') { loadCursosGrid(); preparePromoModal(); prepareMateriaModal(); }
+            if(viewId === 'administracion') { loadCursosGrid(); preparePromoModal(); prepareMateriaModal(); }
             if(viewId === 'mis-cursos') loadMateriasDocente();
             if(viewId === 'mi-boletin') loadBoletin();
             document.getElementById('view-title').textContent = 'Panel ' + viewId.toUpperCase();
@@ -182,44 +174,54 @@
             fetch('/api/carreras').then(res => res.json()).then(carreras => {
                 document.getElementById('carreras-list').innerHTML = carreras.map(c => `
                     <div class="glass-card stat-card" style="cursor:pointer;" onclick="verPlanEstudios('${c._id}', '${c.nombre}')">
-                        <div class="stat-info"><h4>${c.nombre}</h4><p>${c.duracion_anios} años • Ver Plan de Estudios</p></div>
+                        <div class="stat-info"><h4>${c.nombre}</h4><p>${c.duracion_anios} años • Plan de Estudios</p></div>
                     </div>
                 `).join('');
             });
         }
 
-        function verPlanEstudios(id, nombre) {
-            currentCarreraId = id;
-            document.getElementById('plan-titulo').textContent = `Plan de Estudios: ${nombre}`;
-            fetch(`/api/materias?carrera_id=${id}`).then(res => res.json()).then(materias => {
-                document.getElementById('plan-materias-body').innerHTML = materias.map(m => `
-                    <tr><td><strong>${m.nombre}</strong></td><td>${m.area || 'General'}</td></tr>
+        function loadCursosGrid() {
+            fetch('/api/cursos').then(res => res.json()).then(cursos => {
+                document.getElementById('cursos-grid').innerHTML = cursos.map(c => `
+                    <div class="glass-card stat-card" style="cursor:pointer;" onclick="verConsolidado('${c._id}', '${c.nombre}')">
+                        <div class="stat-info"><h4>${c.nombre}</h4><p>Reporte de Notas</p></div>
+                    </div>
                 `).join('');
-                openModal('modal-plan-estudios');
             });
         }
 
-        document.getElementById('materiaPlanForm').onsubmit = function(e) {
-            e.preventDefault();
-            const payload = { nombre: document.getElementById('plan-mat-nombre').value, area: document.getElementById('plan-mat-area').value, carrera_id: currentCarreraId };
-            fetch('/api/admin/materias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(() => {
-                Swal.fire('Éxito', 'Materia agregada al Plan de Estudios.', 'success');
-                closeModal('modal-nueva-materia-plan');
-                verPlanEstudios(currentCarreraId, '');
+        function verConsolidado(id, nombre) {
+            fetch(`/api/admin/cursos/${id}/consolidado`).then(res => res.json()).then(data => {
+                document.getElementById('consolidado-titulo').textContent = `Reporte de Notas: ${nombre}`;
+                document.getElementById('consolidado-thead').innerHTML = `<tr><th>Alumno</th>${data.materias.map(m => `<th>${m}</th>`).join('')}</tr>`;
+                document.getElementById('consolidado-tbody').innerHTML = data.consolidado.map(row => `<tr><td>${row.nombre}</td>${row.notas.map(n => `<td>${n.valor}</td>`).join('')}</tr>`).join('');
+                openModal('modal-consolidado');
             });
-        };
+        }
 
-        // Resto de lógica estándar
-        document.getElementById('carreraForm').onsubmit = function(e) { e.preventDefault(); const payload = { nombre: document.getElementById('car-nombre').value, duracion_anios: document.getElementById('car-duracion').value }; fetch('/api/admin/carreras', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(() => { Swal.fire('Éxito', 'Carrera creada.', 'success'); closeModal('modal-nueva-carrera'); loadCarreras(); }); };
-        function preparePromoModal() { fetch('/api/cursos').then(res => res.json()).then(cursos => { const opts = cursos.map(c => `<option value="${c._id}">${c.nombre}</option>`).join(''); document.getElementById('promo-origen').innerHTML = opts; document.getElementById('promo-destino').innerHTML = `<option value="egreso">EGRESAR</option>` + opts; }); }
-        document.getElementById('promoForm').onsubmit = function(e) { e.preventDefault(); const destino = document.getElementById('promo-destino').value; const payload = { curso_origen_id: document.getElementById('promo-origen').value, curso_destino_id: destino === 'egreso' ? null : destino, es_egreso: destino === 'egreso' }; fetch('/api/admin/promocionar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(res => res.json()).then(data => { Swal.fire('Éxito', `${data.count} procesados.`, 'success'); closeModal('modal-promocion'); loadUsers(); }); };
-        function loadNoticias() { fetch('/api/noticias').then(res => res.json()).then(news => { document.getElementById('news-count').textContent = news.length; document.getElementById('noticias-list').innerHTML = news.map(n => `<div style="padding:15px; background:var(--bg-main); border-left:4px solid var(--primary); margin-bottom:10px;"><strong>${n.titulo}</strong><p>${n.contenido}</p></div>`).join(''); }); }
-        function loadUsers() { fetch('/api/admin/users').then(res => res.json()).then(users => { document.getElementById('users-table-body').innerHTML = users.map(u => `<tr><td>${u.dni}</td><td><strong>${u.nombre_completo}</strong></td><td>${u.rol}</td><td>${u.estado_academico}</td></tr>`).join(''); }); }
-        function loadCursosGrid() { fetch('/api/cursos').then(res => res.json()).then(cursos => { document.getElementById('cursos-grid').innerHTML = cursos.map(c => `<div class="glass-card stat-card" style="cursor:pointer;" onclick="verConsolidado('${c._id}', '${c.nombre}')"><h4>${c.nombre}</h4><p>Sábana de Notas</p></div>`).join(''); }); }
-        function prepareMateriaModal() { fetch('/api/cursos').then(res => res.json()).then(cursos => { document.getElementById('mat-curso').innerHTML = cursos.map(c => `<option value="${c._id}">${c.nombre}</option>`).join(''); }); fetch('/api/admin/users').then(res => res.json()).then(users => { document.getElementById('mat-docente').innerHTML = users.filter(u => u.rol === 'docente').map(d => `<option value="${d.dni}">${d.nombre_completo}</option>`).join(''); }); }
-        function loadMateriasDocente() { fetch('/api/materias').then(res => res.json()).then(materias => { document.getElementById('materias-docente-list').innerHTML = materias.map(m => `<div class="glass-card stat-card"><h4>${m.curso_id.nombre}</h4><p>${m.nombre}</p></div>`).join(''); }); }
-        function loadBoletin() { fetch('/api/boletin').then(res => res.json()).then(notas => { document.getElementById('boletin-table-body').innerHTML = notas.map(n => `<tr><td>${n.materia_id.nombre}</td><td>${n.valor}</td><td>${n.periodo}</td></tr>`).join(''); }); }
-        
+        function loadUsers() {
+            fetch('/api/admin/users').then(res => res.json()).then(users => {
+                document.getElementById('users-table-body').innerHTML = users.map(u => `
+                    <tr>
+                        <td>${u.dni}</td>
+                        <td><strong>${u.nombre_completo}</strong></td>
+                        <td>${u.rol}</td>
+                        <td>${u.rol === 'alumno' ? `<button class="btn-premium btn-outline-premium" style="padding:5px 10px; font-size:0.7rem;" onclick="prepararInscripcion('${u.dni}', '${u.nombre_completo}')">Inscribir</button>` : '-'}</td>
+                    </tr>
+                `).join('');
+            });
+        }
+
+        // Resto de lógica de formularios...
+        function prepareCursoModal() { fetch('/api/carreras').then(res => res.json()).then(c => { document.getElementById('cur-carrera').innerHTML = c.map(x => `<option value="${x._id}">${x.nombre}</option>`).join(''); }); }
+        document.getElementById('cursoForm').onsubmit = function(e) { e.preventDefault(); const payload = { nombre: document.getElementById('cur-nombre').value, carrera_id: document.getElementById('cur-carrera').value }; fetch('/api/admin/cursos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(() => { Swal.fire('Éxito', 'Curso creado.', 'success'); closeModal('modal-nuevo-curso'); if(document.getElementById('administracion-view').classList.contains('active')) loadCursosGrid(); }); };
+        function prepararInscripcion(dni, nombre) { document.getElementById('insc-alumno-dni').value = dni; document.getElementById('insc-alumno-nombre').textContent = nombre; fetch('/api/cursos').then(res => res.json()).then(c => { document.getElementById('insc-curso').innerHTML = c.map(x => `<option value="${x._id}">${x.nombre}</option>`).join(''); openModal('modal-inscripcion'); }); }
+        document.getElementById('inscForm').onsubmit = function(e) { e.preventDefault(); const payload = { alumno_dni: document.getElementById('insc-alumno-dni').value, curso_id: document.getElementById('insc-curso').value }; fetch('/api/admin/inscripciones', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(() => { Swal.fire('Éxito', 'Inscripción realizada.', 'success'); closeModal('modal-inscripcion'); loadUsers(); }); };
+        function prepareMateriaModal() { fetch('/api/cursos').then(res => res.json()).then(c => { document.getElementById('mat-curso').innerHTML = c.map(x => `<option value="${x._id}">${x.nombre}</option>`).join(''); }); fetch('/api/admin/users').then(res => res.json()).then(u => { document.getElementById('mat-docente').innerHTML = u.filter(x => x.rol === 'docente').map(d => `<option value="${d.dni}">${d.nombre_completo}</option>`).join(''); }); }
+        document.getElementById('materiaForm').onsubmit = function(e) { e.preventDefault(); const payload = { nombre: document.getElementById('mat-nombre').value, curso_id: document.getElementById('mat-curso').value, docente_dni: document.getElementById('mat-docente').value }; fetch('/api/admin/materias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(() => { Swal.fire('Éxito', 'Materia asignada.', 'success'); closeModal('modal-materia-admin'); loadCursosGrid(); }); };
+        function preparePromoModal() { fetch('/api/cursos').then(res => res.json()).then(c => { const o = c.map(x => `<option value="${x._id}">${x.nombre}</option>`).join(''); document.getElementById('promo-origen').innerHTML = o; document.getElementById('promo-destino').innerHTML = `<option value="egreso">EGRESAR</option>` + o; }); }
+        document.getElementById('promoForm').onsubmit = function(e) { e.preventDefault(); const d = document.getElementById('promo-destino').value; const payload = { curso_origen_id: document.getElementById('promo-origen').value, curso_destino_id: d === 'egreso' ? null : d, es_egreso: d === 'egreso' }; fetch('/api/admin/promocionar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }).then(res => res.json()).then(x => { Swal.fire('Éxito', `${x.count} procesados.`, 'success'); closeModal('modal-promocion'); loadUsers(); }); };
+
         loadUserInfo();
         loadNoticias();
     </script>

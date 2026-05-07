@@ -37,7 +37,7 @@ const UserSchema = new mongoose.Schema({
     rol: { type: String, required: true }, 
     entidad_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Entidad' },
     avatar_url: { type: String, default: 'https://cdn-icons-png.flaticon.com/512/147/147142.png' },
-    estado_academico: { type: String, default: 'Activo' }, // Activo, Egresado, Suspendido
+    estado_academico: { type: String, default: 'Activo' },
     documentos: [String]
 });
 
@@ -54,7 +54,7 @@ const MateriaSchema = new mongoose.Schema({
     carrera_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Carrera' },
     curso_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Curso' },
     docente_dni: String,
-    ciclo_lectivo: { type: Number, default: new Date().getFullYear() }
+    ciclo_lectivo: { type: Number, default: 2026 }
 });
 
 const InscripcionSchema = new mongoose.Schema({
@@ -67,8 +67,8 @@ const NotaSchema = new mongoose.Schema({
     alumno_dni: String,
     materia_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Materia' },
     valor: Number,
-    tipo: String, // seguimiento, trimestral, avance
-    periodo: String, // 1er Trimestre
+    tipo: String, 
+    periodo: String, 
     comentario: String, 
     fecha: { type: Date, default: Date.now }
 });
@@ -89,75 +89,74 @@ const NoticiaSchema = new mongoose.Schema({
 
 // --- MODELOS ---
 const Entidad = mongoose.model('Entidad', EntidadSchema);
+const Carrera = mongoose.model('Carrera', CarreraSchema);
 const User = mongoose.model('User', UserSchema);
 const Curso = mongoose.model('Curso', CursoSchema);
 const Materia = mongoose.model('Materia', MateriaSchema);
 const Inscripcion = mongoose.model('Inscripcion', InscripcionSchema);
 const Nota = mongoose.model('Nota', NotaSchema);
-const Noticia = mongoose.model('Noticia', NoticiaSchema);
 const Asistencia = mongoose.model('Asistencia', AsistenciaSchema);
-const Carrera = mongoose.model('Carrera', CarreraSchema);
+const Noticia = mongoose.model('Noticia', NoticiaSchema);
 
 async function seedDemo() {
     try {
-        const count = await Entidad.countDocuments({ nombre: 'Instituto Perito Moreno' });
+        const count = await Carrera.countDocuments();
         
         if (count === 0) {
-            console.log('🔄 Re-inicializando Demo con Avatares y Rutas completas...');
+            console.log('🔄 Sincronizando Cursos con Carreras en la Demo...');
             
             await Entidad.deleteMany({});
+            await Carrera.deleteMany({});
             await User.deleteMany({});
             await Curso.deleteMany({});
             await Materia.deleteMany({});
             await Inscripcion.deleteMany({});
             await Nota.deleteMany({});
+            await Asistencia.deleteMany({});
             await Noticia.deleteMany({});
 
             const perito = await new Entidad({
                 nombre: 'Instituto Perito Moreno',
-                direccion: 'Av. Bustillo 123, Bariloche',
-                telefono: '294-4556677'
+                direccion: 'Av. Bustillo 123, Bariloche'
             }).save();
 
-            // Usuarios de Gestión
+            // CREO LA CARRERA
+            const secundaria = await new Carrera({
+                nombre: 'Educación Secundaria Orientada',
+                entidad_id: perito._id,
+                duracion_anios: 5
+            }).save();
+
+            const tallerProgramacion = await new Carrera({
+                nombre: 'Taller de Programación Avanzada',
+                entidad_id: perito._id,
+                duracion_anios: 2
+            }).save();
+
+            // USUARIOS
             await User.create([
-                { dni: '123', password: 'admin', nombre_completo: 'Pugliese Nicolas', rol: 'admin_global' },
                 { dni: '456', password: 'pass', nombre_completo: 'Director Perito', rol: 'director', entidad_id: perito._id },
-                { dni: '789', password: 'pass', nombre_completo: 'Secretaria Marta', rol: 'administrativo', entidad_id: perito._id }
+                { dni: '10', password: 'pass', nombre_completo: 'Julian Alvarez', rol: 'docente', entidad_id: perito._id }
             ]);
 
-            // Docentes
-            await User.create([
-                { dni: '10', password: 'pass', nombre_completo: 'Julian Alvarez', rol: 'docente', entidad_id: perito._id },
-                { dni: '11', password: 'pass', nombre_completo: 'Lionel Messi', rol: 'docente', entidad_id: perito._id }
-            ]);
+            // ASIGNO CURSOS A LA CARRERA
+            const curso1A = await new Curso({ nombre: '1A', nivel: 'Secundaria', carrera_id: secundaria._id, entidad_id: perito._id }).save();
+            const curso2A = await new Curso({ nombre: '2A', nivel: 'Secundaria', carrera_id: secundaria._id, entidad_id: perito._id }).save();
+            const cursoProg1 = await new Curso({ nombre: 'Prog 1', nivel: 'Taller', carrera_id: tallerProgramacion._id, entidad_id: perito._id }).save();
 
-            // Cursos
-            const curso1A = await new Curso({ nombre: '1A', nivel: 'secundaria', entidad_id: perito._id }).save();
-            const curso2A = await new Curso({ nombre: '2A', nivel: 'secundaria', entidad_id: perito._id }).save();
-
-            // Materias
+            // MATERIAS
             await Materia.create([
-                { nombre: 'Matemática', area: 'Exactas', curso_id: curso1A._id, docente_dni: '10', ciclo_lectivo: 2026 },
-                { nombre: 'Lengua', area: 'Comunicación', curso_id: curso1A._id, docente_dni: '11', ciclo_lectivo: 2026 },
-                { nombre: 'Física', area: 'Exactas', curso_id: curso2A._id, docente_dni: '10', ciclo_lectivo: 2026 }
+                { nombre: 'Matemática', area: 'Exactas', curso_id: curso1A._id, carrera_id: secundaria._id, docente_dni: '10' },
+                { nombre: 'Programación I', area: 'Sistemas', curso_id: cursoProg1._id, carrera_id: tallerProgramacion._id, docente_dni: '10' }
             ]);
 
-            // Alumnos (15 por curso)
-            for (let i = 0; i < 15; i++) {
-                const dni = (1000 + i).toString();
-                await User.create({ dni: dni, password: 'pass', nombre_completo: `Alumno 1A - ${i}`, rol: 'alumno', entidad_id: perito._id });
-                await Inscripcion.create({ alumno_dni: dni, curso_id: curso1A._id, ciclo_lectivo: 2026 });
-            }
+            await Noticia.create({ titulo: 'Nueva Estructura', contenido: 'Ahora los cursos pertenecen a Carreras.', entidad_id: perito._id });
 
-            // Noticias
-            await Noticia.create({ titulo: 'Bienvenida 2026', contenido: 'Comienzo de clases el 1 de Marzo.', entidad_id: perito._id });
-
-            console.log('✅ Demo PEI re-inicializada con soporte de Avatares.');
+            console.log('✅ Demo sincronizada: 1A y 2A pertenecen a "Educación Secundaria Orientada".');
         }
     } catch (err) {
         console.error('Error al seedear:', err.message);
     }
 }
 
-module.exports = { Entidad, User, Curso, Materia, Inscripcion, Nota, Noticia, Asistencia, Carrera, mongoose };
+module.exports = { Entidad, Carrera, User, Curso, Materia, Inscripcion, Nota, Asistencia, Noticia, mongoose };

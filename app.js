@@ -249,6 +249,27 @@ app.post('/api/admin/promocionar', isAuthenticated, isAdmin, async (req, res) =>
     }
 });
 
+// Crear Nuevo Curso
+app.post('/api/admin/cursos', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const curso = await new Curso({ ...req.body, entidad_id: req.session.entidadId }).save();
+        res.json(curso);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al crear curso' });
+    }
+});
+
+// Inscribir Alumno a Curso
+app.post('/api/admin/inscripciones', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const { alumno_dni, curso_id } = req.body;
+        const insc = await new Inscripcion({ alumno_dni, curso_id, ciclo_lectivo: 2026 }).save();
+        res.json(insc);
+    } catch (err) {
+        res.status(500).json({ error: 'Error en la inscripción' });
+    }
+});
+
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/');
