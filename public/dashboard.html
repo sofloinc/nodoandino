@@ -13,10 +13,12 @@
         .sidebar-brand { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
         .school-logo { width: 80px; height: 80px; border-radius: 50%; background: white; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
-        .modal-card { width: 900px; padding: 30px; max-height: 90vh; overflow-y: auto; }
-        tr.clickable { cursor: pointer; }
+        .modal-card { width: 800px; padding: 30px; max-height: 90vh; overflow-y: auto; }
+        tr.clickable { cursor: pointer; transition: 0.2s; }
         tr.clickable:hover { background: rgba(0,0,0,0.05); }
-        .table-consolidada { font-size: 0.8rem; }
+        .avatar-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; margin-top: 20px; }
+        .avatar-option { width: 80px; height: 80px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: 0.2s; }
+        .avatar-option:hover { transform: scale(1.1); border-color: var(--primary); }
     </style>
 </head>
 
@@ -25,8 +27,8 @@
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-brand">
-                <div class="school-logo"><i class="fas fa-mountain" style="color: var(--primary); font-size: 2rem;"></i></div>
-                <div id="sidebar-school-name" style="font-weight: 700; color: white;">NodoAndino</div>
+                <div class="school-logo" id="sidebar-school-logo"><i class="fas fa-mountain" style="color: var(--primary); font-size: 2rem;"></i></div>
+                <div id="sidebar-school-name" style="font-weight: 700; color: white;">PEI Platform</div>
             </div>
             <nav class="nav-menu">
                 <a href="#" class="nav-item active" onclick="showView('home')"><i class="fas fa-home"></i> Inicio</a>
@@ -43,68 +45,98 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="dashboard-header">
-                <div><h1 id="view-title" style="color: var(--primary); font-size: 1.8rem;">Cargando...</h1><p style="color: #666;">Bienvenido, <span id="user-display-name">...</span>.</p></div>
-                <div class="user-profile">
+                <div><h1 id="view-title" style="color: var(--primary); font-size: 1.8rem;">Panel</h1><p style="color: #666;">Bienvenido, <span id="user-display-name">...</span>.</p></div>
+                <div class="user-profile" onclick="openModal('modal-avatar')" style="cursor:pointer;">
                     <div style="text-align: right;"><p id="user-role-display" style="font-weight: 600;">...</p><p id="user-dni-display" style="font-size: 0.8rem; color: #888;">...</p></div>
-                    <div class="avatar" id="user-avatar">?</div>
+                    <img id="user-avatar-img" class="avatar" src="" alt="Avatar" style="width:50px; height:50px; object-fit:cover;">
                 </div>
             </header>
 
+            <!-- VISTAS -->
             <div id="home-view" class="view-section active">
-                <div class="glass-card content-card"><h3>Dashboard PEI</h3><p>Gestión integral para el Instituto Perito Moreno.</p></div>
+                <section class="stats-grid">
+                    <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(42, 75, 124, 0.1); color: var(--primary);"><i class="fas fa-calendar"></i></div><div class="stat-info"><h4>Ciclo Lectivo</h4><p>2026</p></div></div>
+                    <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(230, 126, 34, 0.1); color: var(--secondary);"><i class="fas fa-bell"></i></div><div class="stat-info"><h4>Noticias</h4><p>Nuevos Avisos</p></div></div>
+                </section>
+                <div class="glass-card content-card"><h3>Novedades de la Institución</h3><div id="noticias-list" style="margin-top: 15px;"></div></div>
+            </div>
+
+            <div id="legajos-view" class="view-section">
+                <section class="glass-card content-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><h3>Legajos Comunidad</h3><button class="btn-premium btn-primary-premium">Nuevo Registro</button></div>
+                    <table class="data-table"><thead><tr><th>DNI</th><th>Nombres y Apellidos</th><th>Rol</th><th>Acciones</th></tr></thead><tbody id="users-table-body"></tbody></table>
+                </section>
             </div>
 
             <div id="planificacion-view" class="view-section">
                 <section class="glass-card content-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>Planificación Académica</h3>
-                        <div id="cursos-list-buttons" style="display:flex; gap:10px;"></div>
-                    </div>
-                    <p>Selecciona un curso para ver el reporte consolidado de notas (Sábana).</p>
+                    <h3>Sábana de Notas por Curso</h3>
+                    <p>Haz clic en un curso para ver el reporte consolidado (Spreadsheet).</p>
                     <div id="cursos-grid" class="stats-grid" style="margin-top:20px;"></div>
                 </section>
             </div>
 
-            <div id="legajos-view" class="view-section">
-                <section class="glass-card content-card"><h3>Legajos de la Comunidad</h3><table class="data-table"><thead><tr><th>DNI</th><th>Nombres y Apellidos</th><th>Rol</th><th>Acciones</th></tr></thead><tbody id="users-table-body"></tbody></table></section>
-            </div>
-
             <div id="mis-cursos-view" class="view-section">
-                <section class="glass-card content-card"><h3>Mis Cursos Asignados</h3><div id="materias-docente-list" class="stats-grid" style="margin-top:20px;"></div></section>
+                <section class="glass-card content-card"><h3>Mis Cursos y Materias</h3><div id="materias-docente-list" class="stats-grid" style="margin-top:20px;"></div></section>
             </div>
 
             <div id="mi-boletin-view" class="view-section">
-                <section class="glass-card content-card"><h3>Mi Trayectoria Escolar</h3><table class="data-table"><thead><tr><th>Materia</th><th>Nota</th><th>Periodo</th></tr></thead><tbody id="boletin-table-body"></tbody></table></section>
+                <section class="glass-card content-card">
+                    <h2 style="text-align: center;">Mi Trayectoria Académica</h2>
+                    <table class="data-table" style="margin-top:20px;"><thead><tr><th>Materia</th><th>Nota</th><th>Periodo</th></tr></thead><tbody id="boletin-table-body"></tbody></table>
+                </section>
             </div>
         </main>
     </div>
 
-    <!-- MODAL: REPORTE CONSOLIDADO -->
+    <!-- MODAL: AVATAR -->
+    <div id="modal-avatar" class="modal">
+        <div class="glass-card modal-card" style="width:500px;">
+            <h3>Elige tu Avatar</h3>
+            <div class="avatar-selector">
+                <img src="https://cdn-icons-png.flaticon.com/512/147/147142.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/147/147129.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/147/147133.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/4333/4333609.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135768.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/1864/1864593.png" class="avatar-option" onclick="changeAvatar(this.src)">
+            </div>
+            <button class="btn-premium btn-outline-premium" style="margin-top:20px; width:100%;" onclick="closeModal('modal-avatar')">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: CONSOLIDADO -->
     <div id="modal-consolidado" class="modal">
         <div class="glass-card modal-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3 id="consolidado-titulo">Reporte Consolidado</h3>
-                <button class="btn-premium btn-primary-premium" onclick="window.print()"><i class="fas fa-print"></i> Exportar PDF</button>
-            </div>
-            <div style="overflow-x: auto;">
-                <table class="data-table table-consolidada">
-                    <thead id="consolidado-thead"></thead>
-                    <tbody id="consolidado-tbody"></tbody>
-                </table>
-            </div>
+            <h3 id="consolidado-titulo">Reporte Consolidado</h3>
+            <div style="overflow-x: auto; margin-top:20px;"><table class="data-table" style="font-size:0.8rem;"><thead id="consolidado-thead"></thead><tbody id="consolidado-tbody"></tbody></table></div>
             <button class="btn-premium btn-outline-premium" style="margin-top:20px;" onclick="closeModal('modal-consolidado')">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- MODAL: CURSO DOCENTE -->
+    <div id="modal-curso-docente" class="modal">
+        <div class="glass-card modal-card">
+            <h3 id="modal-curso-titulo">Alumnos del Curso</h3>
+            <table class="data-table" style="margin-top:20px;"><thead><tr><th>Alumno</th><th>Acción</th></tr></thead><tbody id="alumnos-curso-body"></tbody></table>
+            <button class="btn-premium btn-outline-premium" style="margin-top:20px;" onclick="closeModal('modal-curso-docente')">Cerrar</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        let currentMateriaId = null;
+
         function showView(viewId) {
             document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(viewId + '-view').classList.add('active');
             if (event) event.currentTarget.classList.add('active');
-            if(viewId === 'planificacion') loadCursosGrid();
+            if(viewId === 'home') loadNoticias();
             if(viewId === 'legajos') loadUsers();
+            if(viewId === 'planificacion') loadCursosGrid();
             if(viewId === 'mis-cursos') loadMateriasDocente();
             if(viewId === 'mi-boletin') loadBoletin();
         }
@@ -112,21 +144,51 @@
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        fetch('/api/user').then(res => res.json()).then(user => {
-            document.getElementById('user-display-name').textContent = user.name;
-            document.getElementById('user-role-display').textContent = user.role.toUpperCase();
-            document.getElementById('user-dni-display').textContent = 'DNI: ' + user.dni;
-            document.getElementById('user-avatar').textContent = user.name.charAt(0);
-            if (['director', 'administrativo', 'admin_global'].includes(user.role)) document.getElementById('menu-gestion').style.display = 'block';
-            if (user.role === 'docente') document.getElementById('menu-docente').style.display = 'block';
-            if (user.role === 'alumno') document.getElementById('menu-alumno').style.display = 'block';
-            document.getElementById('view-title').textContent = 'Panel ' + user.role.toUpperCase();
-        });
+        function loadUserInfo() {
+            fetch('/api/user').then(res => res.json()).then(user => {
+                document.getElementById('user-display-name').textContent = user.name;
+                document.getElementById('user-role-display').textContent = user.role.toUpperCase();
+                document.getElementById('user-dni-display').textContent = 'DNI: ' + user.dni;
+                document.getElementById('user-avatar-img').src = user.avatar_url;
+                if (['director', 'administrativo', 'admin_global'].includes(user.role)) document.getElementById('menu-gestion').style.display = 'block';
+                if (user.role === 'docente') document.getElementById('menu-docente').style.display = 'block';
+                if (user.role === 'alumno') document.getElementById('menu-alumno').style.display = 'block';
+            });
+        }
+
+        function changeAvatar(url) {
+            fetch('/api/user/avatar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ avatar_url: url })
+            }).then(() => {
+                document.getElementById('user-avatar-img').src = url;
+                Swal.fire('Éxito', 'Avatar actualizado', 'success');
+                closeModal('modal-avatar');
+            });
+        }
+
+        function loadNoticias() {
+            fetch('/api/noticias').then(res => res.json()).then(news => {
+                document.getElementById('noticias-list').innerHTML = news.map(n => `
+                    <div style="padding: 15px; border-left: 4px solid var(--secondary); background: #f9f9f9; margin-bottom: 10px;">
+                        <strong>${n.titulo}</strong><p>${n.contenido}</p>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function loadUsers() {
+            fetch('/api/admin/users').then(res => res.json()).then(users => {
+                document.getElementById('users-table-body').innerHTML = users.map(u => `
+                    <tr><td>${u.dni}</td><td><strong>${u.nombre_completo}</strong></td><td>${u.rol}</td><td><i class="fas fa-eye"></i></td></tr>
+                `).join('');
+            });
+        }
 
         function loadCursosGrid() {
             fetch('/api/cursos').then(res => res.json()).then(cursos => {
-                const grid = document.getElementById('cursos-grid');
-                grid.innerHTML = cursos.map(c => `
+                document.getElementById('cursos-grid').innerHTML = cursos.map(c => `
                     <div class="glass-card stat-card" style="cursor:pointer;" onclick="verConsolidado('${c._id}', '${c.nombre}')">
                         <div class="stat-info"><h4>${c.nombre}</h4><p>Ver Reporte Consolidado</p></div>
                     </div>
@@ -135,26 +197,46 @@
         }
 
         function verConsolidado(cursoId, cursoNombre) {
-            document.getElementById('consolidado-titulo').textContent = `Reporte Consolidado - Curso ${cursoNombre} (2026)`;
             fetch(`/api/admin/cursos/${cursoId}/consolidado`).then(res => res.json()).then(data => {
-                const thead = document.getElementById('consolidado-thead');
-                const tbody = document.getElementById('consolidado-tbody');
-                
-                thead.innerHTML = `<tr><th>Alumno</th>${data.materias.map(m => `<th>${m}</th>`).join('')}</tr>`;
-                tbody.innerHTML = data.consolidado.map(row => `
-                    <tr>
-                        <td><strong>${row.nombre}</strong><br><small>${row.dni}</small></td>
-                        ${row.notas.map(n => `<td>${n.valor}</td>`).join('')}
-                    </tr>
+                document.getElementById('consolidado-titulo').textContent = `Consolidado ${cursoNombre}`;
+                document.getElementById('consolidado-thead').innerHTML = `<tr><th>Alumno</th>${data.materias.map(m => `<th>${m}</th>`).join('')}</tr>`;
+                document.getElementById('consolidado-tbody').innerHTML = data.consolidado.map(row => `
+                    <tr><td><strong>${row.nombre}</strong></td>${row.notas.map(n => `<td>${n.valor}</td>`).join('')}</tr>
                 `).join('');
-                
                 openModal('modal-consolidado');
             });
         }
 
-        function loadUsers() { fetch('/api/admin/users').then(res => res.json()).then(users => { document.getElementById('users-table-body').innerHTML = users.map(u => `<tr><td>${u.dni}</td><td><strong>${u.nombre_completo}</strong></td><td>${u.rol}</td><td><i class="fas fa-eye"></i></td></tr>`).join(''); }); }
-        function loadMateriasDocente() { fetch('/api/materias').then(res => res.json()).then(mats => { document.getElementById('materias-docente-list').innerHTML = mats.map(m => `<div class="glass-card stat-card"><h4>${m.curso_id.nombre}</h4><p>${m.nombre}</p></div>`).join(''); }); }
-        function loadBoletin() { fetch('/api/boletin').then(res => res.json()).then(nts => { document.getElementById('boletin-table-body').innerHTML = nts.map(n => `<tr><td>${n.materia_id.nombre}</td><td>${n.valor}</td><td>${n.periodo}</td></tr>`).join(''); }); }
+        function loadMateriasDocente() {
+            fetch('/api/materias').then(res => res.json()).then(materias => {
+                document.getElementById('materias-docente-list').innerHTML = materias.map(m => `
+                    <div class="glass-card stat-card" style="cursor:pointer;" onclick="viewCursoAlumnos('${m._id}', '${m.nombre}', '${m.curso_id.nombre}')">
+                        <div class="stat-info"><h4>${m.curso_id.nombre}</h4><p>${m.nombre}</p></div>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function viewCursoAlumnos(materiaId, materiaNombre, cursoNombre) {
+            fetch(`/api/materias/${materiaId}/alumnos`).then(res => res.json()).then(alumnos => {
+                document.getElementById('modal-curso-titulo').textContent = `${cursoNombre} - ${materiaNombre}`;
+                document.getElementById('alumnos-curso-body').innerHTML = alumnos.map(a => `
+                    <tr><td><strong>${a.nombre_completo}</strong></td><td><button class="btn-premium btn-primary-premium" style="padding:5px 10px; font-size:0.7rem;">Calificar</button></td></tr>
+                `).join('');
+                openModal('modal-curso-docente');
+            });
+        }
+
+        function loadBoletin() {
+            fetch('/api/boletin').then(res => res.json()).then(notas => {
+                document.getElementById('boletin-table-body').innerHTML = notas.map(n => `
+                    <tr><td>${n.materia_id.nombre}</td><td>${n.valor}</td><td>${n.periodo}</td></tr>
+                `).join('');
+            });
+        }
+
+        loadUserInfo();
+        loadNoticias();
     </script>
 </body>
 

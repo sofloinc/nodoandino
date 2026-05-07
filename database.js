@@ -30,6 +30,7 @@ const UserSchema = new mongoose.Schema({
     nombre_completo: { type: String, required: true },
     rol: { type: String, required: true }, 
     entidad_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Entidad' },
+    avatar_url: { type: String, default: 'https://cdn-icons-png.flaticon.com/512/147/147142.png' },
     documentos: [String]
 });
 
@@ -83,8 +84,8 @@ async function seedDemo() {
     try {
         const count = await Entidad.countDocuments({ nombre: 'Instituto Perito Moreno' });
         
-        if (count === 0 || (await User.countDocuments({ rol: 'alumno' })) < 20) {
-            console.log('🔄 Re-inicializando Demo con datos masivos para Pruebas Docentes...');
+        if (count === 0) {
+            console.log('🔄 Re-inicializando Demo con Avatares y Rutas completas...');
             
             await Entidad.deleteMany({});
             await User.deleteMany({});
@@ -100,51 +101,41 @@ async function seedDemo() {
                 telefono: '294-4556677'
             }).save();
 
-            // 1. Usuarios de Gestión
+            // Usuarios de Gestión
             await User.create([
                 { dni: '123', password: 'admin', nombre_completo: 'Pugliese Nicolas', rol: 'admin_global' },
                 { dni: '456', password: 'pass', nombre_completo: 'Director Perito', rol: 'director', entidad_id: perito._id },
                 { dni: '789', password: 'pass', nombre_completo: 'Secretaria Marta', rol: 'administrativo', entidad_id: perito._id }
             ]);
 
-            // 2. Docentes (Julian y Lionel)
+            // Docentes
             await User.create([
                 { dni: '10', password: 'pass', nombre_completo: 'Julian Alvarez', rol: 'docente', entidad_id: perito._id },
                 { dni: '11', password: 'pass', nombre_completo: 'Lionel Messi', rol: 'docente', entidad_id: perito._id }
             ]);
 
-            // 3. Cursos
+            // Cursos
             const curso1A = await new Curso({ nombre: '1A', nivel: 'secundaria', entidad_id: perito._id }).save();
             const curso2A = await new Curso({ nombre: '2A', nivel: 'secundaria', entidad_id: perito._id }).save();
 
-            // 4. Materias Asignadas
+            // Materias
             await Materia.create([
                 { nombre: 'Matemática', area: 'Exactas', curso_id: curso1A._id, docente_dni: '10', ciclo_lectivo: 2026 },
                 { nombre: 'Lengua', area: 'Comunicación', curso_id: curso1A._id, docente_dni: '11', ciclo_lectivo: 2026 },
                 { nombre: 'Física', area: 'Exactas', curso_id: curso2A._id, docente_dni: '10', ciclo_lectivo: 2026 }
             ]);
 
-            // 5. Generación Masiva de Alumnos (15 por curso)
-            const apellidos = ['Gonzales', 'Rodriguez', 'Lopez', 'Garcia', 'Martinez', 'Perez', 'Sanchez', 'Romero', 'Diaz', 'Torres'];
-            const nombres = ['Pedro', 'Ana', 'Luis', 'Maria', 'Jose', 'Carla', 'Diego', 'Lucia', 'Mateo', 'Sofia'];
-
-            // Alumnos para 1A
+            // Alumnos (15 por curso)
             for (let i = 0; i < 15; i++) {
                 const dni = (1000 + i).toString();
-                const nombreCompleto = `${apellidos[i % 10]} ${nombres[i % 10]}`;
-                await User.create({ dni: dni, password: 'pass', nombre_completo: nombreCompleto, rol: 'alumno', entidad_id: perito._id });
+                await User.create({ dni: dni, password: 'pass', nombre_completo: `Alumno 1A - ${i}`, rol: 'alumno', entidad_id: perito._id });
                 await Inscripcion.create({ alumno_dni: dni, curso_id: curso1A._id, ciclo_lectivo: 2026 });
             }
 
-            // Alumnos para 2A
-            for (let i = 0; i < 15; i++) {
-                const dni = (2000 + i).toString();
-                const nombreCompleto = `${apellidos[i % 10]} ${nombres[(i+1) % 10]}`;
-                await User.create({ dni: dni, password: 'pass', nombre_completo: nombreCompleto, rol: 'alumno', entidad_id: perito._id });
-                await Inscripcion.create({ alumno_dni: dni, curso_id: curso2A._id, ciclo_lectivo: 2026 });
-            }
+            // Noticias
+            await Noticia.create({ titulo: 'Bienvenida 2026', contenido: 'Comienzo de clases el 1 de Marzo.', entidad_id: perito._id });
 
-            console.log('✅ Demo PEI actualizada: Julian Alvarez (DNI 10) ahora tiene 15 alumnos en 1A y 15 alumnos en 2A.');
+            console.log('✅ Demo PEI re-inicializada con soporte de Avatares.');
         }
     } catch (err) {
         console.error('Error al seedear:', err.message);

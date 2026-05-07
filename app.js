@@ -61,11 +61,27 @@ app.post('/login', async (req, res) => {
 app.get('/dashboard', isAuthenticated, (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
 
 // API USUARIO
-app.get('/api/user', isAuthenticated, (req, res) => {
-    res.json({ dni: req.session.userDni, name: req.session.userName, role: req.session.userRole, entidadId: req.session.entidadId });
+app.get('/api/user', isAuthenticated, async (req, res) => {
+    const user = await User.findOne({ dni: req.session.userDni });
+    res.json({ dni: req.session.userDni, name: req.session.userName, role: req.session.userRole, entidadId: req.session.entidadId, avatar_url: user.avatar_url });
 });
 
-// API ACADÉMICA DOCENTE
+app.post('/api/user/avatar', isAuthenticated, async (req, res) => {
+    try {
+        await User.findOneAndUpdate({ dni: req.session.userDni }, { avatar_url: req.body.avatar_url });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Error' });
+    }
+});
+
+app.get('/api/entidad', isAuthenticated, async (req, res) => {
+    if (!req.session.entidadId) return res.json({ nombre: 'PEI Global' });
+    const entidad = await Entidad.findById(req.session.entidadId);
+    res.json(entidad);
+});
+
+// API ACADÉMICA
 app.get('/api/materias', isAuthenticated, async (req, res) => {
     let filter = { ciclo_lectivo: 2026 };
     if (req.session.userRole === 'docente') filter.docente_dni = req.session.userDni;
@@ -73,31 +89,42 @@ app.get('/api/materias', isAuthenticated, async (req, res) => {
     res.json(materias);
 });
 
-// Obtener alumnos de una materia específica
+app.get('/api/cursos', isAuthenticated, async (req, res) => {
+    const filter = req.session.entidadId ? { entidad_id: req.session.entidadId } : {};
+    const cursos = await Curso.find(filter);
+    res.json(cursos);
+});
+
+app.get('/api/boletin', isAuthenticated, async (req, res) => {
+    const notas = await Nota.find({ alumno_dni: req.session.userDni }).populate('materia_id');
+    res.json(notas);
+});
+
+app.get('/api/noticias', isAuthenticated, async (req, res) => {
+    const filter = req.session.entidadId ? { entidad_id: req.session.entidadId } : {};
+    const noticias = await Noticia.find(filter).sort({ fecha: -1 });
+    res.json(noticias);
+});
+
 app.get('/api/materias/:id/alumnos', isAuthenticated, async (req, res) => {
     try {
         const materia = await Materia.findById(req.params.id);
-        if (!materia) return res.status(404).json({ error: 'Materia no encontrada' });
-        
-        // Alumnos inscriptos en el curso de esta materia
         const inscripciones = await Inscripcion.find({ curso_id: materia.curso_id });
         const dnis = inscripciones.map(i => i.alumno_dni);
         const alumnos = await User.find({ dni: { $in: dnis } }).sort({ nombre_completo: 1 });
-        
         res.json(alumnos);
     } catch (err) {
         res.status(500).json({ error: 'Error' });
     }
 });
 
-// Cargar Nota o Informe de Avance
 app.post('/api/notas', isAuthenticated, async (req, res) => {
     try {
         const { alumno_dni, materia_id, valor, tipo, periodo, comentario } = req.body;
-        const nuevaNota = await new Nota({ alumno_dni, materia_id, valor, tipo, periodo, comentario }).save();
-        res.json(nuevaNota);
+        await new Nota({ alumno_dni, materia_id, valor, tipo, periodo, comentario }).save();
+        res.json({ success: true });
     } catch (err) {
-        res.status(500).json({ error: 'Error al cargar nota' });
+        res.status(500).json({ error: 'Error' });
     }
 });
 
@@ -119,31 +146,23 @@ app.get('/api/admin/users/:dni', isAuthenticated, isAdmin, async (req, res) => {
     res.json({ ...user._doc, ...extra });
 });
 
-// Reporte Consolidado de Curso
 app.get('/api/admin/cursos/:id/consolidado', isAuthenticated, isAdmin, async (req, res) => {
-    try {
-        const cursoId = req.params.id;
-        const materias = await Materia.find({ curso_id: cursoId });
-        const inscripciones = await Inscripcion.find({ curso_id: cursoId });
-        const dnis = inscripciones.map(i => i.alumno_dni);
-        const alumnos = await User.find({ dni: { $in: dnis } }).sort({ nombre_completo: 1 });
-        
-        const consolidado = [];
-        for (let alumno of alumnos) {
-            const notas = await Nota.find({ alumno_dni: alumno.dni, materia_id: { $in: materias.map(m => m._id) } });
-            consolidado.push({
-                nombre: alumno.nombre_completo,
-                dni: alumno.dni,
-                notas: materias.map(m => {
-                    const nota = notas.find(n => n.materia_id.equals(m._id));
-                    return { materia: m.nombre, valor: nota ? nota.valor : '-' };
-                })
-            });
-        }
-        res.json({ materias: materias.map(m => m.nombre), consolidado });
-    } catch (err) {
-        res.status(500).json({ error: 'Error' });
+    const materias = await Materia.find({ curso_id: req.params.id });
+    const inscripciones = await Inscripcion.find({ curso_id: req.params.id });
+    const alumnos = await User.find({ dni: { $in: inscripciones.map(i => i.alumno_dni) } }).sort({ nombre_completo: 1 });
+    const consolidado = [];
+    for (let alumno of alumnos) {
+        const notas = await Nota.find({ alumno_dni: alumno.dni, materia_id: { $in: materias.map(m => m._id) } });
+        consolidado.push({
+            nombre: alumno.nombre_completo,
+            dni: alumno.dni,
+            notas: materias.map(m => {
+                const nota = notas.find(n => n.materia_id.equals(m._id));
+                return { materia: m.nombre, valor: nota ? nota.valor : '-' };
+            })
+        });
     }
+    res.json({ materias: materias.map(m => m.nombre), consolidado });
 });
 
 app.get('/logout', (req, res) => {
