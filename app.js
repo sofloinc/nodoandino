@@ -1,6 +1,9 @@
+
+app.use(express.static('public')); // Esto permite que Node "vea" tus archivos HTML y CSS
 const express = require('express'); // Importamos la librería
 const app = express();
 const path = require('path');
+
 
 // Para que Node pueda leer los datos de los formularios (como $_POST en PHP)
 app.use(express.urlencoded({ extended: true }));
@@ -32,10 +35,11 @@ app.post('/login', (req, res) => {
 
 // RUTA 3: El Dashboard
 app.get('/dashboard', (req, res) => {
-    res.send('<h1>Bienvenido al Panel Administrativo</h1><p>Esto es privado.</p>');
+    res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 // Arrancar el servidor
-app.listen(3000, () => {
-    console.log('Servidor corriendo en http://localhost:3000');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor en puerto ${PORT}`);
 });
