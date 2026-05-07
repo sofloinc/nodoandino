@@ -179,7 +179,16 @@ app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     res.json(users);
 });
 
-// Crear Nuevo Usuario (Legajo)
+app.get('/api/cursos/:id/detalles', isAuthenticated, async (req, res) => {
+    try {
+        const inscripciones = await Inscripcion.find({ curso_id: req.params.id, ciclo_lectivo: 2026 });
+        const alumnos = await User.find({ dni: { $in: inscripciones.map(i => i.alumno_dni) } });
+        const materias = await Materia.find({ curso_id: req.params.id });
+        res.json({ alumnos, materias });
+    } catch (err) {
+        res.status(500).json({ error: 'Error' });
+    }
+});
 app.post('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     try {
         const { dni, password, nombre_completo, rol } = req.body;

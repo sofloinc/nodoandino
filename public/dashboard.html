@@ -17,7 +17,9 @@
         .modal-close-btn { position: sticky; top: 0; float: right; cursor: pointer; font-size: 1.5rem; color: var(--text-muted); background: var(--bg-card); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); z-index: 10; border: 1px solid var(--border); }
         .theme-toggle { padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 10px; cursor: pointer; color: rgba(255,255,255,0.7); }
         .theme-toggle:hover { color: white; }
-        .tree-node { border-left: 2px solid var(--primary); margin-left: 20px; padding-left: 20px; margin-top: 10px; }
+        .breadcrumb { display: flex; gap: 10px; margin-bottom: 20px; font-size: 0.9rem; color: var(--text-muted); }
+        .breadcrumb span { cursor: pointer; transition: 0.3s; }
+        .breadcrumb span:hover { color: var(--primary); text-decoration: underline; }
         .badge-premium { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; background: var(--primary); color: white; }
     </style>
 </head>
@@ -33,9 +35,9 @@
             <nav class="nav-menu">
                 <a href="#" class="nav-item active" onclick="showView('home')"><i class="fas fa-home"></i> Inicio</a>
                 <div id="menu-gestion" style="display: none;">
-                    <a href="#" class="nav-item" onclick="showView('carreras')"><i class="fas fa-university"></i> Carreras y Planes</a>
+                    <a href="#" class="nav-item" onclick="showView('carreras')"><i class="fas fa-university"></i> Oferta Académica</a>
                     <a href="#" class="nav-item" onclick="showView('legajos')"><i class="fas fa-address-card"></i> Legajos</a>
-                    <a href="#" class="nav-item" onclick="showView('administracion')"><i class="fas fa-tools"></i> Administración</a>
+                    <a href="#" class="nav-item" onclick="showView('administracion')"><i class="fas fa-cog"></i> Administración</a>
                 </div>
                 <div id="menu-docente" style="display: none;"><a href="#" class="nav-item" onclick="showView('mis-cursos')"><i class="fas fa-chalkboard-teacher"></i> Mis Cursos</a></div>
                 <div id="menu-alumno" style="display: none;"><a href="#" class="nav-item" onclick="showView('mi-boletin')"><i class="fas fa-file-invoice"></i> Mi Boletín</a></div>
@@ -61,20 +63,13 @@
                     <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(230, 126, 34, 0.1); color: var(--secondary);"><i class="fas fa-chalkboard-teacher"></i></div><div class="stat-info"><h4 id="stat-docentes">0</h4><p>Docentes</p></div></div>
                     <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(46, 204, 113, 0.1); color: #2ecc71;"><i class="fas fa-graduation-cap"></i></div><div class="stat-info"><h4 id="stat-carreras">0</h4><p>Carreras</p></div></div>
                 </section>
-                <div class="glass-card content-card" id="explorer-section" style="display:none;"><h3>Resumen Institucional</h3><div id="explorer-root"></div></div>
-                
-                <!-- Home Docente -->
-                <div id="docente-home-row" style="display:none;">
-                    <div class="glass-card content-card"><h3>Mis Clases de Hoy</h3><div id="clases-hoy-list" class="stats-grid" style="margin-top:20px;"></div></div>
-                </div>
-
-                <div class="glass-card content-card" style="margin-top:20px;"><h3>Novedades</h3><div id="noticias-list"></div></div>
+                <div class="glass-card content-card" style="margin-top:20px;"><h3>Novedades Institucionales</h3><div id="noticias-list"></div></div>
             </div>
 
             <div id="carreras-view" class="view-section">
                 <section class="glass-card content-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>Carreras y Talleres</h3>
+                        <h3>Plan Maestro de Carreras</h3>
                         <button class="btn-premium btn-primary-premium" onclick="openModal('modal-nueva-carrera')">+ Nueva Carrera</button>
                     </div>
                     <div id="carreras-grid" class="stats-grid"></div>
@@ -87,56 +82,64 @@
                         <h3>Comunidad Educativa</h3>
                         <button class="btn-premium btn-primary-premium" onclick="openModal('modal-nuevo-legajo')">+ Nuevo Legajo</button>
                     </div>
-                    <table class="data-table"><thead><tr><th>DNI</th><th>Nombre Completo</th><th>Rol</th><th>Inscripción</th></tr></thead><tbody id="users-table-body"></tbody></table>
+                    <table class="data-table"><thead><tr><th>DNI</th><th>Nombre Completo</th><th>Rol</th><th>Acción</th></tr></thead><tbody id="users-table-body"></tbody></table>
                 </section>
             </div>
 
             <div id="administracion-view" class="view-section">
                 <section class="glass-card content-card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>Administración Académica</h3>
-                        <div style="display:flex; gap:10px;">
-                            <button class="btn-premium btn-outline-premium" onclick="openModal('modal-nuevo-curso')">+ Nuevo Curso</button>
-                            <button class="btn-premium btn-primary-premium" onclick="openModal('modal-materia-admin')">+ Asignar Materia</button>
+                    <div id="admin-breadcrumb" class="breadcrumb">
+                        <span onclick="loadAdminLevel1()">Institución</span>
+                    </div>
+                    <div id="admin-content-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 id="admin-view-subtitle">Carreras Activas</h3>
+                        <div id="admin-actions" style="display:flex; gap:10px;">
+                             <button class="btn-premium btn-outline-premium" onclick="openModal('modal-nuevo-curso')">+ Nuevo Curso</button>
+                             <button class="btn-premium btn-primary-premium" onclick="openModal('modal-materia-admin')">+ Asignar Cátedra</button>
                         </div>
                     </div>
-                    <div id="cursos-grid" class="stats-grid"></div>
+                    
+                    <div id="admin-main-grid" class="stats-grid"></div>
+                    
+                    <!-- Detail View (Hidden by default) -->
+                    <div id="admin-detail-view" style="display:none; margin-top:30px;">
+                        <div class="glass-card" style="background:var(--bg-main); padding:20px; border-left:4px solid var(--secondary); margin-bottom:20px;">
+                            <h4 style="color:var(--secondary); margin-bottom:10px;">Materias del Curso</h4>
+                            <div id="admin-curso-materias" style="display:flex; flex-wrap:wrap; gap:10px;"></div>
+                        </div>
+                        <h4>Nómina de Alumnos</h4>
+                        <table class="data-table" style="margin-top:10px;">
+                            <thead><tr><th>DNI</th><th>Nombre</th><th>Estado</th><th>Reporte</th></tr></thead>
+                            <tbody id="admin-curso-alumnos"></tbody>
+                        </table>
+                    </div>
                 </section>
             </div>
 
             <div id="mis-cursos-view" class="view-section">
-                <section class="glass-card content-card"><h3>Mis Agrupaciones a Cargo</h3><div id="materias-docente-list" class="stats-grid"></div></section>
+                <section class="glass-card content-card"><h3>Mis Clases a Cargo</h3><div id="materias-docente-list" class="stats-grid"></div></section>
             </div>
 
             <div id="mi-boletin-view" class="view-section">
-                <section class="glass-card content-card"><h3>Mi Boletín de Notas</h3><table class="data-table"><thead><tr><th>Materia</th><th>Nota</th><th>Periodo</th></tr></thead><tbody id="boletin-table-body"></tbody></table></section>
+                <section class="glass-card content-card"><h3>Trayectoria Académica</h3><table class="data-table"><thead><tr><th>Materia</th><th>Nota</th><th>Periodo</th></tr></thead><tbody id="boletin-table-body"></tbody></table></section>
             </div>
         </main>
     </div>
 
     <!-- MODALES -->
-    <div id="modal-curso-docente" class="modal">
-        <div class="glass-card modal-card" style="max-width:700px;">
-            <div class="modal-close-btn" onclick="closeModal('modal-curso-docente')">&times;</div>
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3 id="modal-curso-titulo">Alumnos</h3>
-                <button class="btn-premium btn-outline-premium" onclick="openAsistenciaModal()"><i class="fas fa-check-square"></i> Tomar Asistencia</button>
-            </div>
-            <table class="data-table" style="margin-top:20px;"><thead><tr><th>Alumno</th><th>Acción</th></tr></thead><tbody id="alumnos-curso-body"></tbody></table>
-        </div>
-    </div>
-
-    <div id="modal-asistencia" class="modal"><div class="glass-card modal-card" style="max-width:600px;"><div class="modal-close-btn" onclick="closeModal('modal-asistencia')">&times;</div><h3>Pasar Asistencia - <span id="asistencia-fecha"></span></h3><div style="margin-top:20px;"><table class="data-table"><thead><tr><th>Alumno</th><th>Estado</th></tr></thead><tbody id="asistencia-alumnos-body"></tbody></table><button class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;" onclick="saveAsistencia()">Guardar Asistencia</button></div></div></div>
-    <div id="modal-explorer-carrera" class="modal"><div class="glass-card modal-card" style="max-width:900px;"><div class="modal-close-btn" onclick="closeModal('modal-explorer-carrera')">&times;</div><h2 id="explorer-carrera-titulo"></h2><div id="explorer-cursos-list" style="margin-top:30px;"></div></div></div>
-    <div id="modal-nuevo-legajo" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-nuevo-legajo')">&times;</div><h3>Nuevo Legajo</h3><form id="userForm" style="margin-top:20px;"><div class="form-group"><label>DNI</label><input type="text" id="user-dni" class="form-control-premium" required></div><div class="form-group"><label>Nombre</label><input type="text" id="user-nombre" class="form-control-premium" required></div><div class="form-group"><label>Rol</label><select id="user-rol" class="form-control-premium"><option value="alumno">Alumno</option><option value="docente">Docente</option></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Guardar</button></form></div></div>
-    <div id="modal-consolidado" class="modal"><div class="glass-card modal-card" style="max-width:900px;"><div class="modal-close-btn" onclick="closeModal('modal-consolidado')">&times;</div><h3 id="consolidado-titulo">Reporte de Notas</h3><div style="overflow-x:auto; margin-top:20px;"><table class="data-table"><thead id="consolidado-thead"></thead><tbody id="consolidado-tbody"></tbody></table></div></div></div>
-    <div id="modal-avatar" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-avatar')">&times;</div><h3>Avatar</h3><div class="avatar-selector"><img src="https://cdn-icons-png.flaticon.com/512/147/147142.png" class="avatar-option" onclick="changeAvatar(this.src)"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="avatar-option" onclick="changeAvatar(this.src)"></div></div></div>
+    <div id="modal-plan-estudios" class="modal"><div class="glass-card modal-card" style="max-width:600px;"><div class="modal-close-btn" onclick="closeModal('modal-plan-estudios')">&times;</div><h3 id="plan-titulo"></h3><div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;"><h4>Materias del Plan</h4><button class="btn-premium btn-primary-premium" onclick="openModal('modal-nueva-materia-plan')">+ Agregar</button></div><table class="data-table"><thead><tr><th>Nombre</th><th>Área</th></tr></thead><tbody id="plan-materias-body"></tbody></table></div></div>
+    <div id="modal-nueva-materia-plan" class="modal"><div class="glass-card modal-card" style="max-width:400px; z-index:2100;"><div class="modal-close-btn" onclick="closeModal('modal-nueva-materia-plan')">&times;</div><h3>Nueva Materia al Plan</h3><form id="materiaPlanForm"><div class="form-group"><label>Nombre</label><input type="text" id="plan-mat-nombre" class="form-control-premium" required></div><div class="form-group"><label>Área</label><input type="text" id="plan-mat-area" class="form-control-premium"></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Guardar</button></form></div></div>
+    <div id="modal-nueva-carrera" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-nueva-carrera')">&times;</div><h3>Crear Carrera</h3><form id="carreraForm"><div class="form-group"><label>Nombre</label><input type="text" id="car-nombre" class="form-control-premium" required placeholder="Ej: Enfermería"></div><div class="form-group"><label>Duración (Años)</label><input type="number" id="car-duracion" class="form-control-premium" required value="3"></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Crear</button></form></div></div>
+    <div id="modal-nuevo-curso" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-nuevo-curso')">&times;</div><h3>Crear Curso</h3><form id="cursoForm"><div class="form-group"><label>Nombre del Curso</label><input type="text" id="cur-nombre" class="form-control-premium" required placeholder="Ej: 1er Año Comisión A"></div><div class="form-group"><label>Carrera</label><select id="cur-carrera" class="form-control-premium"></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Crear</button></form></div></div>
+    <div id="modal-nuevo-legajo" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-nuevo-legajo')">&times;</div><h3>Nuevo Legajo</h3><form id="userForm"><div class="form-group"><label>DNI</label><input type="text" id="user-dni" class="form-control-premium" required></div><div class="form-group"><label>Nombre</label><input type="text" id="user-nombre" class="form-control-premium" required></div><div class="form-group"><label>Rol</label><select id="user-rol" class="form-control-premium"><option value="alumno">Alumno</option><option value="docente">Docente</option><option value="administrativo">Administrativo</option></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Guardar</button></form></div></div>
+    <div id="modal-materia-admin" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-materia-admin')">&times;</div><h3>Asignar Materia a Curso</h3><form id="materiaForm"><div class="form-group"><label>Nombre de la Materia</label><input type="text" id="mat-nombre" class="form-control-premium" required></div><div class="form-group"><label>Curso Destino</label><select id="mat-curso" class="form-control-premium"></select></div><div class="form-group"><label>Docente a Cargo</label><select id="mat-docente" class="form-control-premium"></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Asignar Cátedra</button></form></div></div>
+    <div id="modal-inscripcion" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-inscripcion')">&times;</div><h3>Inscribir Alumno</h3><p id="insc-alumno-nombre" style="font-weight:700; color:var(--primary);"></p><form id="inscForm"><input type="hidden" id="insc-alumno-dni"><div class="form-group"><label>Seleccionar Curso</label><select id="insc-curso" class="form-control-premium"></select></div><button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Confirmar</button></form></div></div>
+    <div id="modal-avatar" class="modal"><div class="glass-card modal-card" style="max-width:400px;"><div class="modal-close-btn" onclick="closeModal('modal-avatar')">&times;</div><h3>Cambiar Avatar</h3><div class="avatar-selector"><img src="https://cdn-icons-png.flaticon.com/512/147/147142.png" class="avatar-option" onclick="changeAvatar(this.src)"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="avatar-option" onclick="changeAvatar(this.src)"></div></div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let currentUser = null;
-        let currentMateriaId = null;
-        let currentAlumnos = [];
+        let currentCarreraId = null;
 
         function toggleTheme() { const curr = document.documentElement.getAttribute('data-theme'); const next = curr === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', next); localStorage.setItem('theme', next); updateThemeUI(next); }
         function updateThemeUI(t) { const i = document.getElementById('theme-icon'); const x = document.getElementById('theme-text'); if(t === 'dark'){ i.className='fas fa-sun'; x.textContent='Modo Claro'; } else { i.className='fas fa-moon'; x.textContent='Modo Oscuro'; } }
@@ -149,10 +152,10 @@
             document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(viewId + '-view').classList.add('active');
-            if(viewId === 'home') loadHomeContent();
-            if(viewId === 'carreras') loadCarrerasGrid();
+            if(viewId === 'home') loadHomeStats();
+            if(viewId === 'carreras') loadCarrerasMaster();
             if(viewId === 'legajos') loadUsers();
-            if(viewId === 'administracion') { loadCursosGrid(); prepareAdminModals(); }
+            if(viewId === 'administracion') loadAdminLevel1();
             if(viewId === 'mis-cursos') loadMateriasDocente();
             if(viewId === 'mi-boletin') loadBoletin();
             document.getElementById('view-title').textContent = 'Panel ' + viewId.toUpperCase();
@@ -168,104 +171,102 @@
                 if (['director', 'administrativo', 'admin_global'].includes(u.role)) document.getElementById('menu-gestion').style.display = 'block';
                 if (u.role === 'docente') document.getElementById('menu-docente').style.display = 'block';
                 if (u.role === 'alumno') document.getElementById('menu-alumno').style.display = 'block';
-                loadHomeContent();
             });
         }
 
-        function loadHomeContent() {
-            if (!currentUser) return;
-            const isAdmin = ['director', 'administrativo', 'admin_global'].includes(currentUser.role);
-            
-            if (isAdmin) {
-                document.getElementById('admin-stats-row').style.display = 'grid';
-                document.getElementById('explorer-section').style.display = 'block';
-                document.getElementById('docente-home-row').style.display = 'none';
-                loadAdminStats();
-            } else if (currentUser.role === 'docente') {
-                document.getElementById('admin-stats-row').style.display = 'none';
-                document.getElementById('explorer-section').style.display = 'none';
-                document.getElementById('docente-home-row').style.display = 'block';
-                loadDocenteHome();
-            }
-            loadNoticias();
-        }
-
-        function loadAdminStats() {
+        function loadHomeStats() {
             fetch('/api/admin/stats').then(res => res.json()).then(stats => {
+                document.getElementById('admin-stats-row').style.display = 'grid';
                 document.getElementById('stat-alumnos').textContent = stats.alumnos;
                 document.getElementById('stat-docentes').textContent = stats.docentes;
                 document.getElementById('stat-carreras').textContent = stats.carreras;
+            }).catch(() => document.getElementById('admin-stats-row').style.display = 'none');
+            fetch('/api/noticias').then(res => res.json()).then(news => {
+                document.getElementById('noticias-list').innerHTML = news.map(n => `<div style="padding:15px; border-left:4px solid var(--primary); background:var(--bg-card); margin-bottom:10px;"><strong>${n.titulo}</strong><p>${n.contenido}</p></div>`).join('');
             });
+        }
+
+        // --- ADMINISTRACION DRILL-DOWN ---
+        function loadAdminLevel1() {
+            document.getElementById('admin-breadcrumb').innerHTML = '<span onclick="loadAdminLevel1()">Institución</span>';
+            document.getElementById('admin-view-subtitle').textContent = 'Carreras Activas';
+            document.getElementById('admin-detail-view').style.display = 'none';
+            document.getElementById('admin-main-grid').style.display = 'grid';
             fetch('/api/carreras').then(res => res.json()).then(carreras => {
-                document.getElementById('explorer-root').innerHTML = carreras.map(c => `
-                    <div class="glass-card stat-card" style="margin-bottom:10px; cursor:pointer;" onclick="verDetalleInstitucional('${c._id}')">
-                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                            <span><i class="fas fa-folder"></i> <strong>${c.nombre}</strong></span>
-                            <span class="badge-premium">Explorar</span>
-                        </div>
+                document.getElementById('admin-main-grid').innerHTML = carreras.map(c => `
+                    <div class="glass-card stat-card" style="cursor:pointer;" onclick="loadAdminLevel2('${c._id}', '${c.nombre}')">
+                        <div class="stat-info"><h4>${c.nombre}</h4><p>Explorar Cursos</p></div>
                     </div>
                 `).join('');
             });
         }
 
-        function loadDocenteHome() {
-            fetch('/api/materias').then(res => res.json()).then(materias => {
-                document.getElementById('clases-hoy-list').innerHTML = materias.map(m => `
-                    <div class="glass-card stat-card" style="cursor:pointer;" onclick="viewCursoAlumnos('${m._id}', '${m.nombre}', '${m.curso_id.nombre}')">
-                        <div class="stat-info"><h4>${m.curso_id.nombre}</h4><p>${m.nombre}</p></div>
+        function loadAdminLevel2(carreraId, carreraNombre) {
+            document.getElementById('admin-breadcrumb').innerHTML = `<span onclick="loadAdminLevel1()">Institución</span> > <span>${carreraNombre}</span>`;
+            document.getElementById('admin-view-subtitle').textContent = `Cursos en ${carreraNombre}`;
+            fetch(`/api/admin/carreras/${carreraId}/detalles`).then(res => res.json()).then(res => {
+                document.getElementById('admin-main-grid').innerHTML = res.data.map(item => `
+                    <div class="glass-card stat-card" style="cursor:pointer;" onclick="loadAdminLevel3('${item.curso._id}', '${item.curso.nombre}', '${carreraNombre}')">
+                        <div class="stat-info"><h4>${item.curso.nombre}</h4><p>${item.alumnos.length} Alumnos</p></div>
+                    </div>
+                `).join('') || '<p>No hay cursos creados para esta carrera.</p>';
+            });
+        }
+
+        function loadAdminLevel3(cursoId, cursoNombre, carreraNombre) {
+            document.getElementById('admin-breadcrumb').innerHTML = `<span onclick="loadAdminLevel1()">Institución</span> > <span>${carreraNombre}</span> > <span>${cursoNombre}</span>`;
+            document.getElementById('admin-view-subtitle').textContent = `Gestión de Curso: ${cursoNombre}`;
+            document.getElementById('admin-main-grid').style.display = 'none';
+            document.getElementById('admin-detail-view').style.display = 'block';
+
+            // Cargar Alumnos y Materias
+            fetch(`/api/cursos/${cursoId}/detalles`).then(res => res.json()).then(data => {
+                document.getElementById('admin-curso-materias').innerHTML = data.materias.map(m => `
+                    <span class="badge-premium" style="background:var(--bg-card); color:var(--text-main); border:1px solid var(--border);">${m.nombre} (${m.docente_dni || 'Sin docente'})</span>
+                `).join('') || 'Sin materias asignadas';
+                
+                document.getElementById('admin-curso-alumnos').innerHTML = data.alumnos.map(a => `
+                    <tr>
+                        <td>${a.dni}</td>
+                        <td><strong>${a.nombre_completo}</strong></td>
+                        <td>${a.estado_academico}</td>
+                        <td><button class="btn-premium btn-outline-premium" style="padding:5px 10px; font-size:0.7rem;" onclick="verReporteAlumno('${a.dni}')">Ver Reporte</button></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="4">No hay alumnos inscriptos</td></tr>';
+            });
+        }
+
+        // --- GESTION DE CARRERAS MASTER ---
+        function loadCarrerasMaster() {
+            fetch('/api/carreras').then(res => res.json()).then(c => {
+                document.getElementById('carreras-grid').innerHTML = c.map(x => `
+                    <div class="glass-card stat-card" style="cursor:pointer;" onclick="verPlanEstudios('${x._id}', '${x.nombre}')">
+                        <div class="stat-info"><h4>${x.nombre}</h4><p>${x.duracion_anios} años • Configurar Plan</p></div>
                     </div>
                 `).join('');
             });
         }
 
-        function loadMateriasDocente() {
-            fetch('/api/materias').then(res => res.json()).then(materias => {
-                document.getElementById('materias-docente-list').innerHTML = materias.map(m => `
-                    <div class="glass-card stat-card" style="cursor:pointer;" onclick="viewCursoAlumnos('${m._id}', '${m.nombre}', '${m.curso_id.nombre}')">
-                        <div class="stat-info"><h4>${m.curso_id.nombre}</h4><p>${m.nombre}</p></div>
-                    </div>
-                `).join('');
+        function verPlanEstudios(id, nombre) {
+            currentCarreraId = id;
+            document.getElementById('plan-titulo').textContent = `Plan de Estudios: ${nombre}`;
+            fetch(`/api/materias?carrera_id=${id}`).then(res => res.json()).then(materias => {
+                document.getElementById('plan-materias-body').innerHTML = materias.map(m => `<tr><td><strong>${m.nombre}</strong></td><td>${m.area || 'General'}</td></tr>`).join('');
+                openModal('modal-plan-estudios');
             });
         }
 
-        function viewCursoAlumnos(materiaId, materiaNombre, cursoNombre) {
-            currentMateriaId = materiaId;
-            fetch(`/api/materias/${materiaId}/alumnos`).then(res => res.json()).then(alumnos => {
-                currentAlumnos = alumnos;
-                document.getElementById('modal-curso-titulo').textContent = `${cursoNombre} - ${materiaNombre}`;
-                document.getElementById('alumnos-curso-body').innerHTML = alumnos.map(a => `
-                    <tr><td><strong>${a.nombre_completo}</strong></td><td><button class="btn-premium btn-primary-premium" style="padding:5px 10px; font-size:0.7rem;" onclick="calificarAlumno('${a.dni}', '${a.nombre_completo}')">Calificar</button></td></tr>
-                `).join('');
-                openModal('modal-curso-docente');
-            });
-        }
-
-        function openAsistenciaModal() {
-            const hoy = new Date().toLocaleDateString();
-            document.getElementById('asistencia-fecha').textContent = hoy;
-            document.getElementById('asistencia-alumnos-body').innerHTML = currentAlumnos.map(a => `
-                <tr><td>${a.nombre_completo}</td><td><select class="form-control-premium" data-dni="${a.dni}" style="padding:5px;"><option value="Presente">Presente</option><option value="Ausente">Ausente</option><option value="Tarde">Tarde</option></select></td></tr>
-            `).join('');
-            openModal('modal-asistencia');
-        }
-
-        function saveAsistencia() {
-            const registros = [];
-            document.querySelectorAll('#asistencia-alumnos-body select').forEach(sel => { registros.push({ dni: sel.getAttribute('data-dni'), estado: sel.value }); });
-            fetch('/api/asistencia', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ materia_id: currentMateriaId, registros }) }).then(() => { Swal.fire('Éxito', 'Asistencia guardada', 'success'); closeModal('modal-asistencia'); });
-        }
-
-        function calificarAlumno(dni, nombre) {
-            Swal.fire({ title: `Calificar a ${nombre}`, html: `<input id="swal-nota" class="swal2-input" placeholder="Nota" type="number"><input id="swal-periodo" class="swal2-input" placeholder="Periodo">`, preConfirm: () => { return { nota: document.getElementById('swal-nota').value, periodo: document.getElementById('swal-periodo').value } } }).then((r) => { if (r.isConfirmed) { fetch('/api/notas', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ alumno_dni: dni, materia_id: currentMateriaId, valor: r.value.nota, periodo: r.value.periodo, tipo: 'trimestral' }) }).then(() => Swal.fire('Guardado', 'Calificación registrada', 'success')); } });
-        }
-
-        // Resto de funciones (Carreras, Users, etc.)
-        function loadCarrerasGrid() { fetch('/api/carreras').then(res => res.json()).then(c => { document.getElementById('carreras-grid').innerHTML = c.map(x => `<div class="glass-card stat-card" style="cursor:pointer;" onclick="verPlanEstudios('${x._id}', '${x.nombre}')"><h4>${x.nombre}</h4><p>${x.duracion_anios} años</p></div>`).join(''); }); }
-        function loadUsers() { fetch('/api/admin/users').then(res => res.json()).then(u => { document.getElementById('users-table-body').innerHTML = u.map(x => `<tr><td>${x.dni}</td><td><strong>${x.nombre_completo}</strong></td><td>${x.rol}</td><td><button class="btn-premium btn-outline-premium" style="padding:5px 10px; font-size:0.7rem;" onclick="prepararInscripcion('${x.dni}', '${x.nombre_completo}')">Inscribir</button></td></tr>`).join(''); }); }
-        function loadCursosGrid() { fetch('/api/cursos').then(res => res.json()).then(c => { document.getElementById('cursos-grid').innerHTML = c.map(x => `<div class="glass-card stat-card" style="cursor:pointer;" onclick="verConsolidado('${x._id}', '${x.nombre}')"><h4>${x.nombre}</h4><p>Reporte de Notas</p></div>`).join(''); }); }
-        function loadNoticias() { fetch('/api/noticias').then(res => res.json()).then(n => { document.getElementById('noticias-list').innerHTML = n.map(x => `<div style="padding:15px; border-left:4px solid var(--primary); margin-bottom:10px;"><strong>${x.titulo}</strong><p>${x.contenido}</p></div>`).join(''); }); }
-        function loadBoletin() { fetch('/api/boletin').then(res => res.json()).then(n => { document.getElementById('boletin-table-body').innerHTML = n.map(x => `<tr><td>${x.materia_id.nombre}</td><td>${x.valor}</td><td>${x.periodo}</td></tr>`).join(''); }); }
+        // --- OTROS ---
+        function loadUsers() { fetch('/api/admin/users').then(res => res.json()).then(u => { document.getElementById('users-table-body').innerHTML = u.map(x => `<tr><td>${x.dni}</td><td><strong>${x.nombre_completo}</strong></td><td>${x.rol}</td><td>${x.rol==='alumno'?`<button class="btn-premium btn-outline-premium" style="padding:5px 10px; font-size:0.7rem;" onclick="prepararInscripcion('${x.dni}', '${x.nombre_completo}')">Inscribir</button>`:'-'}</td></tr>`).join(''); }); }
+        function prepararInscripcion(dni, nombre) { document.getElementById('insc-alumno-dni').value = dni; document.getElementById('insc-alumno-nombre').textContent = nombre; fetch('/api/cursos').then(res => res.json()).then(c => { document.getElementById('insc-curso').innerHTML = c.map(x => `<option value="${x._id}">${x.nombre}</option>`).join(''); openModal('modal-inscripcion'); }); }
         function prepareAdminModals() { fetch('/api/carreras').then(res => res.json()).then(c => { document.getElementById('cur-carrera').innerHTML = c.map(x => `<option value="${x._id}">${x.nombre}</option>`).join(''); }); fetch('/api/cursos').then(res => res.json()).then(c => { document.getElementById('mat-curso').innerHTML = c.map(x => `<option value="${x._id}">${x.nombre}</option>`).join(''); }); fetch('/api/admin/users').then(res => res.json()).then(u => { document.getElementById('mat-docente').innerHTML = u.filter(x => x.rol === 'docente').map(d => `<option value="${d.dni}">${d.nombre_completo}</option>`).join(''); }); }
+        function loadMateriasDocente() { fetch('/api/materias').then(res => res.json()).then(m => { document.getElementById('materias-docente-list').innerHTML = m.map(x => `<div class="glass-card stat-card"><h4>${x.curso_id.nombre}</h4><p>${x.nombre}</p></div>`).join(''); }); }
+        function loadBoletin() { fetch('/api/boletin').then(res => res.json()).then(n => { document.getElementById('boletin-table-body').innerHTML = n.map(x => `<tr><td>${x.materia_id.nombre}</td><td>${x.valor}</td><td>${x.periodo}</td></tr>`).join(''); }); }
+
+        document.getElementById('carreraForm').onsubmit = function(e) { e.preventDefault(); const p = { nombre: document.getElementById('car-nombre').value, duracion_anios: document.getElementById('car-duracion').value }; fetch('/api/admin/carreras', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) }).then(() => { Swal.fire('Éxito', 'Carrera creada.', 'success'); closeModal('modal-nueva-carrera'); loadCarrerasMaster(); }); };
+        document.getElementById('cursoForm').onsubmit = function(e) { e.preventDefault(); const p = { nombre: document.getElementById('cur-nombre').value, carrera_id: document.getElementById('cur-carrera').value }; fetch('/api/admin/cursos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) }).then(() => { Swal.fire('Éxito', 'Curso creado.', 'success'); closeModal('modal-nuevo-curso'); loadAdminLevel1(); }); };
+        document.getElementById('materiaPlanForm').onsubmit = function(e) { e.preventDefault(); const p = { nombre: document.getElementById('plan-mat-nombre').value, area: document.getElementById('plan-mat-area').value, carrera_id: currentCarreraId }; fetch('/api/admin/materias', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) }).then(() => { Swal.fire('Éxito', 'Materia agregada.', 'success'); closeModal('modal-nueva-materia-plan'); verPlanEstudios(currentCarreraId, ''); }); };
+        document.getElementById('inscForm').onsubmit = function(e) { e.preventDefault(); const p = { alumno_dni: document.getElementById('insc-alumno-dni').value, curso_id: document.getElementById('insc-curso').value }; fetch('/api/admin/inscripciones', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(p) }).then(() => { Swal.fire('Éxito', 'Inscripción exitosa.', 'success'); closeModal('modal-inscripcion'); loadUsers(); }); };
 
         loadUserInfo();
     </script>
