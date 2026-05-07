@@ -1,8 +1,9 @@
 
 app.use(express.static('public')); // Esto permite que Node "vea" tus archivos HTML y CSS
-const express = require('express'); // Importamos la librería
+const express = require('express');
+const session = require('express-session');
+const path = require('path'); // <--- ¡ESTA LÍNEA ES VITAL!
 const app = express();
-const path = require('path');
 
 
 // Para que Node pueda leer los datos de los formularios (como $_POST en PHP)
