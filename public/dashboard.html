@@ -12,8 +12,10 @@
         .view-section.active { display: block; }
         .sidebar-brand { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
         .school-logo { width: 80px; height: 80px; border-radius: 50%; background: white; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
-        .modal-card { width: 600px; padding: 30px; max-height: 90vh; overflow-y: auto; background: white; border-radius: 20px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+        .modal-card { width: 100%; max-width: 800px; padding: 30px; max-height: 90vh; overflow-y: auto; background: white; border-radius: 20px; position: relative; }
+        .modal-close-btn { position: sticky; top: 0; float: right; cursor: pointer; font-size: 1.5rem; color: #888; background: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 10; }
+        .modal-close-btn:hover { color: var(--primary); }
         tr.clickable { cursor: pointer; transition: 0.2s; }
         tr.clickable:hover { background: rgba(0,0,0,0.05); }
         .avatar-selector { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; margin-top: 20px; }
@@ -47,101 +49,116 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="dashboard-header">
-                <div><h1 id="view-title" style="color: var(--primary); font-size: 1.8rem;">Panel</h1><p style="color: #666;">Bienvenido, <span id="user-display-name">...</span>.</p></div>
+                <div><h1 id="view-title" style="color: var(--primary); font-size: 1.8rem;">Cargando...</h1><p style="color: #666;">Bienvenido, <span id="user-display-name">...</span>.</p></div>
                 <div class="user-profile" onclick="openModal('modal-avatar')" style="cursor:pointer;">
                     <div style="text-align: right;"><p id="user-role-display" style="font-weight: 600;">...</p><p id="user-dni-display" style="font-size: 0.8rem; color: #888;">...</p></div>
                     <img id="user-avatar-img" class="avatar" src="" alt="Avatar" style="width:50px; height:50px; object-fit:cover;">
                 </div>
             </header>
 
-            <!-- VISTA: HOME -->
+            <!-- VISTAS -->
             <div id="home-view" class="view-section active">
                 <section class="stats-grid">
-                    <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(42, 75, 124, 0.1); color: var(--primary);"><i class="fas fa-calendar"></i></div><div class="stat-info"><h4>Ciclo Lectivo</h4><p>2026</p></div></div>
-                    <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(230, 126, 34, 0.1); color: var(--secondary);"><i class="fas fa-bell"></i></div><div class="stat-info"><h4>Noticias</h4><p>Actualizado</p></div></div>
+                    <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(42, 75, 124, 0.1); color: var(--primary);"><i class="fas fa-mountain"></i></div><div class="stat-info"><h4>NodoAndino</h4><p>Gestión Patagónica</p></div></div>
+                    <div class="glass-card stat-card"><div class="stat-icon" style="background: rgba(230, 126, 34, 0.1); color: var(--secondary);"><i class="fas fa-newspaper"></i></div><div class="stat-info"><h4>Noticias</h4><p id="news-count">0</p></div></div>
                 </section>
-                <div class="glass-card content-card"><h3>Novedades</h3><div id="noticias-list"></div></div>
+                <div class="glass-card content-card"><h3>Novedades de la Institución</h3><div id="noticias-list" style="margin-top:15px;"></div></div>
             </div>
 
-            <!-- VISTA: LEGAJOS -->
             <div id="legajos-view" class="view-section">
                 <section class="glass-card content-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h3>Comunidad Educativa</h3>
                         <button class="btn-premium btn-primary-premium" onclick="openModal('modal-nuevo-legajo')">+ Nuevo Legajo</button>
                     </div>
-                    <table class="data-table"><thead><tr><th>DNI</th><th>Nombre Completo</th><th>Rol</th><th>Detalles</th></tr></thead><tbody id="users-table-body"></tbody></table>
+                    <table class="data-table"><thead><tr><th>DNI</th><th>Nombres y Apellidos</th><th>Rol</th><th>Acciones</th></tr></thead><tbody id="users-table-body"></tbody></table>
                 </section>
             </div>
 
-            <!-- VISTA: PLANIFICACIÓN -->
             <div id="planificacion-view" class="view-section">
                 <section class="glass-card content-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>Planificación Académica</h3>
+                        <h3>Sábana de Notas y Cursos</h3>
                         <button class="btn-premium btn-outline-premium" onclick="openModal('modal-materia-admin')">+ Asignar Materia</button>
                     </div>
+                    <p style="margin-bottom:20px; color:#666;">Selecciona un curso para ver el Reporte Consolidado.</p>
                     <div id="cursos-grid" class="stats-grid"></div>
                 </section>
             </div>
 
-            <!-- VISTA: DOCENTE -->
             <div id="mis-cursos-view" class="view-section">
-                <section class="glass-card content-card"><h3>Mis Agrupaciones</h3><div id="materias-docente-list" class="stats-grid"></div></section>
+                <section class="glass-card content-card"><h3>Mis Cursos y Materias Asignadas</h3><div id="materias-docente-list" class="stats-grid" style="margin-top:20px;"></div></section>
             </div>
 
-            <!-- VISTA: ALUMNO -->
             <div id="mi-boletin-view" class="view-section">
-                <section class="glass-card content-card"><h3>Mi Boletín</h3><table class="data-table"><thead><tr><th>Materia</th><th>Nota</th><th>Periodo</th></tr></thead><tbody id="boletin-table-body"></tbody></table></section>
+                <section class="glass-card content-card">
+                    <h2 style="text-align: center; color: var(--primary);">Mi Trayectoria Académica</h2>
+                    <table class="data-table" style="margin-top:20px;"><thead><tr><th>Materia</th><th>Nota</th><th>Periodo</th></tr></thead><tbody id="boletin-table-body"></tbody></table>
+                </section>
             </div>
         </main>
     </div>
 
-    <!-- MODALES -->
+    <!-- MODAL: NUEVO LEGAJO -->
     <div id="modal-nuevo-legajo" class="modal">
-        <div class="glass-card modal-card" style="width:400px;">
+        <div class="glass-card modal-card" style="max-width:400px;">
+            <div class="modal-close-btn" onclick="closeModal('modal-nuevo-legajo')">&times;</div>
             <h3>Crear Nuevo Legajo</h3>
             <form id="userForm" style="margin-top:20px;">
                 <div class="form-group"><label>DNI</label><input type="text" id="user-dni" class="form-control-premium" required></div>
-                <div class="form-group"><label>Nombre Completo</label><input type="text" id="user-nombre" class="form-control-premium" required></div>
+                <div class="form-group"><label>Nombre y Apellido</label><input type="text" id="user-nombre" class="form-control-premium" required></div>
                 <div class="form-group"><label>Contraseña</label><input type="password" id="user-pass" class="form-control-premium" required></div>
                 <div class="form-group"><label>Rol</label><select id="user-rol" class="form-control-premium"><option value="alumno">Alumno</option><option value="docente">Docente</option><option value="administrativo">Administrativo</option></select></div>
                 <button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Guardar Legajo</button>
-                <button type="button" class="btn-premium btn-outline-premium" style="width:100%; margin-top:10px;" onclick="closeModal('modal-nuevo-legajo')">Cancelar</button>
             </form>
         </div>
     </div>
 
+    <!-- MODAL: ASIGNAR MATERIA -->
     <div id="modal-materia-admin" class="modal">
-        <div class="glass-card modal-card" style="width:400px;">
+        <div class="glass-card modal-card" style="max-width:400px;">
+            <div class="modal-close-btn" onclick="closeModal('modal-materia-admin')">&times;</div>
             <h3>Asignar Materia</h3>
-            <form id="materiaForm">
+            <form id="materiaForm" style="margin-top:20px;">
                 <div class="form-group"><label>Nombre Materia</label><input type="text" id="mat-nombre" class="form-control-premium" required></div>
                 <div class="form-group"><label>Curso</label><select id="mat-curso" class="form-control-premium"></select></div>
                 <div class="form-group"><label>Docente (DNI)</label><select id="mat-docente" class="form-control-premium"></select></div>
-                <button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Asignar</button>
+                <button type="submit" class="btn-premium btn-primary-premium" style="width:100%; margin-top:20px;">Asignar Cátedra</button>
             </form>
         </div>
     </div>
 
-    <div id="modal-avatar" class="modal">
-        <div class="glass-card modal-card" style="width:500px;">
-            <h3>Cambiar Avatar</h3>
-            <div class="avatar-selector">
-                <img src="https://cdn-icons-png.flaticon.com/512/147/147142.png" class="avatar-option" onclick="changeAvatar(this.src)">
-                <img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" class="avatar-option" onclick="changeAvatar(this.src)">
-                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="avatar-option" onclick="changeAvatar(this.src)">
-                <img src="https://cdn-icons-png.flaticon.com/512/4333/4333609.png" class="avatar-option" onclick="changeAvatar(this.src)">
-            </div>
-            <button class="btn-premium btn-outline-premium" style="width:100%; margin-top:20px;" onclick="closeModal('modal-avatar')">Cerrar</button>
+    <!-- MODAL: CONSOLIDADO -->
+    <div id="modal-consolidado" class="modal">
+        <div class="glass-card modal-card" style="max-width:1000px;">
+            <div class="modal-close-btn" onclick="closeModal('modal-consolidado')">&times;</div>
+            <h3 id="consolidado-titulo">Reporte Consolidado</h3>
+            <div style="overflow-x: auto; margin-top:20px;"><table class="data-table" style="font-size:0.8rem;"><thead id="consolidado-thead"></thead><tbody id="consolidado-tbody"></tbody></table></div>
         </div>
     </div>
 
-    <div id="modal-consolidado" class="modal">
-        <div class="glass-card modal-card" style="width:900px;">
-            <h3 id="consolidado-titulo">Consolidado</h3>
-            <div style="overflow-x:auto; margin-top:20px;"><table class="data-table" style="font-size:0.8rem;"><thead id="consolidado-thead"></thead><tbody id="consolidado-tbody"></tbody></table></div>
-            <button class="btn-premium btn-outline-premium" style="width:100%; margin-top:20px;" onclick="closeModal('modal-consolidado')">Cerrar</button>
+    <!-- MODAL: AVATAR -->
+    <div id="modal-avatar" class="modal">
+        <div class="glass-card modal-card" style="max-width:500px;">
+            <div class="modal-close-btn" onclick="closeModal('modal-avatar')">&times;</div>
+            <h3>Selecciona tu Avatar</h3>
+            <div class="avatar-selector">
+                <img src="https://cdn-icons-png.flaticon.com/512/147/147142.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/147/147144.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/147/147129.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/4333/4333609.png" class="avatar-option" onclick="changeAvatar(this.src)">
+                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135768.png" class="avatar-option" onclick="changeAvatar(this.src)">
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CURSO DOCENTE -->
+    <div id="modal-curso-docente" class="modal">
+        <div class="glass-card modal-card" style="max-width:600px;">
+            <div class="modal-close-btn" onclick="closeModal('modal-curso-docente')">&times;</div>
+            <h3 id="modal-curso-titulo">Lista de Alumnos</h3>
+            <table class="data-table" style="margin-top:20px;"><thead><tr><th>Alumno</th><th>Acción</th></tr></thead><tbody id="alumnos-curso-body"></tbody></table>
         </div>
     </div>
 
@@ -155,11 +172,14 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(viewId + '-view').classList.add('active');
             if (event) event.currentTarget.classList.add('active');
+            
             if(viewId === 'home') loadNoticias();
             if(viewId === 'legajos') loadUsers();
             if(viewId === 'planificacion') { loadCursosGrid(); prepareMateriaModal(); }
             if(viewId === 'mis-cursos') loadMateriasDocente();
             if(viewId === 'mi-boletin') loadBoletin();
+            
+            document.getElementById('view-title').textContent = 'Panel ' + viewId.toUpperCase();
         }
 
         function loadUserInfo() {
@@ -184,6 +204,7 @@
 
         function loadNoticias() {
             fetch('/api/noticias').then(res => res.json()).then(news => {
+                document.getElementById('news-count').textContent = news.length;
                 document.getElementById('noticias-list').innerHTML = news.map(n => `<div style="padding:15px; background:#f9f9f9; border-left:4px solid var(--primary); margin-bottom:10px;"><strong>${n.titulo}</strong><p>${n.contenido}</p></div>`).join('');
             });
         }
@@ -207,7 +228,8 @@
 
         function loadCursosGrid() {
             fetch('/api/cursos').then(res => res.json()).then(cursos => {
-                document.getElementById('cursos-grid').innerHTML = cursos.map(c => `<div class="glass-card stat-card" style="cursor:pointer;" onclick="verConsolidado('${c._id}', '${c.nombre}')"><div class="stat-info"><h4>${c.nombre}</h4><p>Ver Consolidado</p></div></div>`).join('');
+                if(cursos.length === 0) document.getElementById('cursos-grid').innerHTML = '<p>No hay cursos registrados.</p>';
+                else document.getElementById('cursos-grid').innerHTML = cursos.map(c => `<div class="glass-card stat-card" style="cursor:pointer;" onclick="verConsolidado('${c._id}', '${c.nombre}')"><div class="stat-info"><h4>${c.nombre}</h4><p>Ver Reporte Consolidado</p></div></div>`).join('');
             });
         }
 
@@ -233,13 +255,23 @@
 
         function loadMateriasDocente() {
             fetch('/api/materias').then(res => res.json()).then(materias => {
-                document.getElementById('materias-docente-list').innerHTML = materias.map(m => `<div class="glass-card stat-card"><h4>${m.curso_id.nombre}</h4><p>${m.nombre}</p></div>`).join('');
+                if(materias.length === 0) document.getElementById('materias-docente-list').innerHTML = '<p>No tienes materias asignadas este año.</p>';
+                else document.getElementById('materias-docente-list').innerHTML = materias.map(m => `<div class="glass-card stat-card" onclick="viewCursoAlumnos('${m._id}', '${m.nombre}', '${m.curso_id.nombre}')"><h4>${m.curso_id.nombre}</h4><p>${m.nombre}</p></div>`).join('');
+            });
+        }
+
+        function viewCursoAlumnos(materiaId, materiaNombre, cursoNombre) {
+            fetch(`/api/materias/${materiaId}/alumnos`).then(res => res.json()).then(alumnos => {
+                document.getElementById('modal-curso-titulo').textContent = `${cursoNombre} - ${materiaNombre}`;
+                document.getElementById('alumnos-curso-body').innerHTML = alumnos.map(a => `<tr><td><strong>${a.nombre_completo}</strong></td><td><button class="btn-premium btn-primary-premium" style="padding:5px 10px; font-size:0.7rem;">Calificar</button></td></tr>`).join('');
+                openModal('modal-curso-docente');
             });
         }
 
         function loadBoletin() {
             fetch('/api/boletin').then(res => res.json()).then(notas => {
-                document.getElementById('boletin-table-body').innerHTML = notas.map(n => `<tr><td>${n.materia_id.nombre}</td><td>${n.valor}</td><td>${n.periodo}</td></tr>`).join('');
+                if(notas.length === 0) document.getElementById('boletin-table-body').innerHTML = '<tr><td colspan="3">Aún no hay notas cargadas.</td></tr>';
+                else document.getElementById('boletin-table-body').innerHTML = notas.map(n => `<tr><td>${n.materia_id.nombre}</td><td>${n.valor}</td><td>${n.periodo}</td></tr>`).join('');
             });
         }
 
