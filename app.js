@@ -85,6 +85,7 @@ app.get('/api/entidad', isAuthenticated, async (req, res) => {
 app.get('/api/materias', isAuthenticated, async (req, res) => {
     let filter = { ciclo_lectivo: 2026 };
     if (req.session.userRole === 'docente') filter.docente_dni = req.session.userDni;
+    if (req.query.carrera_id) filter.carrera_id = req.query.carrera_id;
     const materias = await Materia.find(filter).populate('curso_id');
     res.json(materias);
 });
@@ -166,6 +167,18 @@ app.post('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
         res.json(user);
     } catch (err) {
         res.status(500).json({ error: 'Error al crear usuario (DNI duplicado)' });
+    }
+});
+
+app.post('/api/admin/materias', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const nuevaMateria = await new Materia({
+            ...req.body,
+            ciclo_lectivo: 2026
+        }).save();
+        res.json(nuevaMateria);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al asignar materia' });
     }
 });
 

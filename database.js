@@ -51,6 +51,7 @@ const CursoSchema = new mongoose.Schema({
 const MateriaSchema = new mongoose.Schema({
     nombre: String,
     area: String,
+    carrera_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Carrera' },
     curso_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Curso' },
     docente_dni: String,
     ciclo_lectivo: { type: Number, default: new Date().getFullYear() }
