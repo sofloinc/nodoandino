@@ -43,7 +43,8 @@ const MateriaSchema = new mongoose.Schema({
     nombre: String,
     area: String,
     curso_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Curso' },
-    docente_dni: String
+    docente_dni: String,
+    ciclo_lectivo: { type: Number, default: new Date().getFullYear() }
 });
 
 const NotaSchema = new mongoose.Schema({

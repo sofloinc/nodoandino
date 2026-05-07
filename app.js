@@ -93,10 +93,65 @@ app.get('/api/noticias', isAuthenticated, async (req, res) => {
     res.json(noticias);
 });
 
+// --- GESTIÓN ACADÉMICA (Director/Admin) ---
+
+// Crear Curso
+app.post('/api/admin/cursos', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const nuevoCurso = await new Curso({ 
+            nombre: req.body.nombre, 
+            nivel: req.body.nivel, 
+            entidad_id: req.session.entidadId 
+        }).save();
+        res.json(nuevoCurso);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al crear curso' });
+    }
+});
+
+// Crear Materia y Asignar Docente
+app.post('/api/admin/materias', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const nuevaMateria = await new Materia({
+            nombre: req.body.nombre,
+            area: req.body.area,
+            curso_id: req.body.curso_id,
+            docente_dni: req.body.docente_dni,
+            ciclo_lectivo: req.body.ciclo_lectivo || new Date().getFullYear()
+        }).save();
+        res.json(nuevaMateria);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al asignar materia' });
+    }
+});
+
 app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     const filter = req.session.userRole === 'admin_global' ? {} : { entidad_id: req.session.entidadId };
+    if (req.query.role) filter.rol = req.query.role; 
     const users = await User.find(filter).sort({ nombre_completo: 1 });
     res.json(users);
+});
+
+// Ver Detalle de Usuario (Legajo)
+app.get('/api/admin/users/:dni', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const user = await User.findOne({ dni: req.params.dni }).populate('entidad_id');
+        if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+        
+        // Si es alumno, traer sus notas
+        let extra = {};
+        if (user.rol === 'alumno') {
+            extra.notas = await Nota.find({ alumno_dni: user.dni }).populate('materia_id');
+        }
+        // Si es docente, traer sus materias
+        if (user.rol === 'docente') {
+            extra.materias = await Materia.find({ docente_dni: user.dni }).populate('curso_id');
+        }
+
+        res.json({ ...user._doc, ...extra });
+    } catch (err) {
+        res.status(500).json({ error: 'Error al obtener detalle' });
+    }
 });
 
 // --- GESTIÓN GLOBAL (SuperAdmin) ---
