@@ -135,6 +135,23 @@ app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     res.json(users);
 });
 
+// Crear Nuevo Usuario (Legajo)
+app.post('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const { dni, password, nombre_completo, rol } = req.body;
+        const user = await new User({
+            dni,
+            password,
+            nombre_completo,
+            rol,
+            entidad_id: req.session.entidadId
+        }).save();
+        res.json(user);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al crear usuario (DNI duplicado)' });
+    }
+});
+
 app.get('/api/admin/users/:dni', isAuthenticated, isAdmin, async (req, res) => {
     const user = await User.findOne({ dni: req.params.dni }).populate('entidad_id');
     let extra = {};
