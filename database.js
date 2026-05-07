@@ -1,44 +1,34 @@
-
+// 1. PRIMERA LÍNEA (Vital): Carga las variables antes que cualquier otra cosa
 require('dotenv').config();
 
-const mongoURI = process.env.MONGO_URI;
 const mongoose = require('mongoose');
 
-mongoose.connect(mongoURI)
-    .then(() => {
-        console.log('Conectado a MongoDB Atlas');
-        seedAdmin();
-    })
-    .catch(err => {
-        console.error('Error al conectar a MongoDB:', err.message);
-        console.log('Asegúrate de haber configurado el MONGO_URI correcto en tu archivo .env');
-    });
+// 2. Extraemos la URI de la variable de entorno
+const MONGO_URI = process.env.MONGO_URI;
 
-const userSchema = new mongoose.Schema({
-    usuario: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    rol: { type: String, default: 'admin' }
-});
-
-const User = mongoose.model('User', userSchema);
-
-async function seedAdmin() {
-    try {
-        const count = await User.countDocuments();
-        if (count === 0) {
-            const admin = new User({
-                usuario: 'admin',
-                password: '1234', // En producción usa hashing como bcrypt
-                rol: 'admin'
-            });
-            await admin.save();
-            console.log('Usuario admin inicial creado en MongoDB.');
-        }
-    } catch (err) {
-        console.error('Error al seedear admin:', err);
-    }
+// 3. Verificación de seguridad para los Logs de Render
+if (!MONGO_URI) {
+    console.error("⚠️ ERROR: MONGO_URI no está definida en las variables de entorno.");
+} else {
+    console.log("Servidor: Intentando conectar a la base de datos...");
 }
 
+// 4. Conexión con manejo de errores (Catch)
+mongoose.connect(MONGO_URI)
+    .then(() => {
+        console.log("✅ ¡Conectado con éxito a MongoDB Atlas!");
+    })
+    .catch((err) => {
+        console.error("❌ Error real de MongoDB:", err.message);
+    });
 
-// En database.js al final:
+// Definición de tu modelo User (asegúrate que coincida con tus campos)
+const UserSchema = new mongoose.Schema({
+    usuario: { type: String, required: true, unique: true },
+    password: { type: String, required: true }
+});
+
+const User = mongoose.model('User', UserSchema);
+
+// 5. Exportamos para que app.js lo use
 module.exports = { User, mongoose };
