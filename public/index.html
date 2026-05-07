@@ -4,25 +4,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login NodoAndino</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="description" content="NodoAndino - Plataforma Educativa Integral. Innovación y aprendizaje en la cordillera.">
+    <title>NodoAndino | Plataforma Educativa</title>
+    <link rel="stylesheet" href="estilos.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/dist/css/all.min.css">
 </head>
 
-<body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
-    <div class="card shadow p-4" style="width: 350px;">
-        <h3 class="text-center mb-4">Iniciar Sesión</h3>
-        <form action="/login" method="POST">
-            <div class="mb-3">
-                <label class="form-label">Usuario</label>
-                <input type="text" name="usuario" class="form-control" required>
+<body>
+    <!-- Navigation -->
+    <nav class="glass-nav">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px;">
+            <div class="logo" style="font-weight: 800; font-size: 1.5rem; color: var(--primary);">
+                NODO<span style="color: var(--secondary);">ANDINO</span>
             </div>
-            <div class="mb-3">
-                <label class="form-label">Contraseña</label>
-                <input type="password" name="password" class="form-control" required>
+            <div class="nav-links">
+                <a href="#servicios" style="margin-right: 20px; text-decoration: none; color: var(--dark); font-weight: 600;">Servicios</a>
+                <a href="#acceso" class="btn-premium btn-primary-premium" style="padding: 8px 20px;">Acceso Admin</a>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Entrar al Dashboard</button>
-        </form>
-    </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="bg-gradient-andean hero">
+        <div class="container">
+            <h1>Conectando Saberes, <br>Elevando Futuros</h1>
+            <p>NodoAndino es el ecosistema educativo digital diseñado para potenciar el aprendizaje colaborativo en toda la región. Innovación, tecnología y pedagogía de vanguardia.</p>
+            <div class="hero-btns">
+                <a href="#servicios" class="btn-premium btn-primary-premium">Explorar Servicios</a>
+                <a href="#acceso" class="btn-premium btn-outline-premium" style="margin-left: 15px;">Iniciar Sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Services Section -->
+    <section id="servicios" class="section-padding">
+        <div class="section-title">
+            <h2>Nuestros Servicios</h2>
+            <div class="underline"></div>
+        </div>
+        <div class="services-grid">
+            <div class="glass-card service-card">
+                <div class="service-icon"><i class="fas fa-graduation-cap"></i></div>
+                <h3>Aula Virtual</h3>
+                <p>Plataforma interactiva para clases en vivo y material de estudio centralizado.</p>
+            </div>
+            <div class="glass-card service-card">
+                <div class="service-icon"><i class="fas fa-gamepad"></i></div>
+                <h3>Gamificación</h3>
+                <p>Estrategias de aprendizaje basadas en juegos para motivar a los estudiantes.</p>
+            </div>
+            <div class="glass-card service-card">
+                <div class="service-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Seguimiento IA</h3>
+                <p>Análisis avanzado del progreso educativo mediante inteligencia artificial.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Access Section -->
+    <section id="acceso" class="section-padding admin-section">
+        <div class="section-title">
+            <h2>Acceso Administrativo</h2>
+            <p>Ingresa tus credenciales para gestionar el nodo</p>
+            <div class="underline"></div>
+        </div>
+        
+        <div class="glass-card login-form-container">
+            <form action="/login" method="POST">
+                <div class="form-group">
+                    <label for="usuario">Usuario</label>
+                    <input type="text" id="usuario" name="usuario" class="form-control-premium" placeholder="admin" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" class="form-control-premium" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-premium btn-primary-premium" style="width: 100%; font-size: 1.1rem; margin-top: 10px;">
+                    Entrar al Sistema
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 NodoAndino. Todos los derechos reservados.</p>
+            <div style="margin-top: 15px; opacity: 0.6; font-size: 0.9rem;">
+                Diseñado para la excelencia educativa.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

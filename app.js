@@ -12,16 +12,9 @@ app.use(express.urlencoded({ extended: true }));
 // Simulamos una base de datos simple
 const USER_DB = { user: "admin", pass: "1234" };
 
-// RUTA 1: El formulario de Login (Equivalente a login.php)
+// RUTA 1: Landing Page (index.html)
 app.get('/', (req, res) => {
-    res.send(`
-        <h2>Login</h2>
-        <form action="/login" method="POST">
-            <input type="text" name="usuario" placeholder="Usuario" required><br>
-            <input type="password" name="password" placeholder="Contraseña" required><br>
-            <button type="submit">Entrar</button>
-        </form>
-    `);
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // RUTA 2: Procesar el Login
