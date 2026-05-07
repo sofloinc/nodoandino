@@ -119,6 +119,33 @@ app.get('/api/admin/users/:dni', isAuthenticated, isAdmin, async (req, res) => {
     res.json({ ...user._doc, ...extra });
 });
 
+// Reporte Consolidado de Curso
+app.get('/api/admin/cursos/:id/consolidado', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const cursoId = req.params.id;
+        const materias = await Materia.find({ curso_id: cursoId });
+        const inscripciones = await Inscripcion.find({ curso_id: cursoId });
+        const dnis = inscripciones.map(i => i.alumno_dni);
+        const alumnos = await User.find({ dni: { $in: dnis } }).sort({ nombre_completo: 1 });
+        
+        const consolidado = [];
+        for (let alumno of alumnos) {
+            const notas = await Nota.find({ alumno_dni: alumno.dni, materia_id: { $in: materias.map(m => m._id) } });
+            consolidado.push({
+                nombre: alumno.nombre_completo,
+                dni: alumno.dni,
+                notas: materias.map(m => {
+                    const nota = notas.find(n => n.materia_id.equals(m._id));
+                    return { materia: m.nombre, valor: nota ? nota.valor : '-' };
+                })
+            });
+        }
+        res.json({ materias: materias.map(m => m.nombre), consolidado });
+    } catch (err) {
+        res.status(500).json({ error: 'Error' });
+    }
+});
+
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/');

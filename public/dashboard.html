@@ -13,9 +13,10 @@
         .sidebar-brand { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
         .school-logo { width: 80px; height: 80px; border-radius: 50%; background: white; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000; }
-        .modal-card { width: 700px; padding: 30px; max-height: 90vh; overflow-y: auto; }
+        .modal-card { width: 900px; padding: 30px; max-height: 90vh; overflow-y: auto; }
         tr.clickable { cursor: pointer; }
         tr.clickable:hover { background: rgba(0,0,0,0.05); }
+        .table-consolidada { font-size: 0.8rem; }
     </style>
 </head>
 
@@ -29,22 +30,12 @@
             </div>
             <nav class="nav-menu">
                 <a href="#" class="nav-item active" onclick="showView('home')"><i class="fas fa-home"></i> Inicio</a>
-                
-                <!-- Administrativo / Director -->
                 <div id="menu-gestion" style="display: none;">
                     <a href="#" class="nav-item" onclick="showView('legajos')"><i class="fas fa-address-card"></i> Legajos</a>
-                    <a href="#" class="nav-item" onclick="showView('asignaciones')"><i class="fas fa-calendar-alt"></i> Asignaciones</a>
+                    <a href="#" class="nav-item" onclick="showView('planificacion')"><i class="fas fa-calendar-alt"></i> Planificación</a>
                 </div>
-
-                <!-- Docente -->
-                <div id="menu-docente" style="display: none;">
-                    <a href="#" class="nav-item" onclick="showView('mis-cursos')"><i class="fas fa-chalkboard-teacher"></i> Mis Agrupaciones</a>
-                </div>
-
-                <!-- Alumno -->
-                <div id="menu-alumno" style="display: none;">
-                    <a href="#" class="nav-item" onclick="showView('mi-boletin')"><i class="fas fa-file-invoice"></i> Mi Boletín</a>
-                </div>
+                <div id="menu-docente" style="display: none;"><a href="#" class="nav-item" onclick="showView('mis-cursos')"><i class="fas fa-chalkboard-teacher"></i> Mis Cursos</a></div>
+                <div id="menu-alumno" style="display: none;"><a href="#" class="nav-item" onclick="showView('mi-boletin')"><i class="fas fa-file-invoice"></i> Mi Boletín</a></div>
             </nav>
             <div style="padding: 20px;"><a href="/logout" class="nav-item" style="border-left: none; opacity: 0.6;"><i class="fas fa-sign-out-alt"></i> Salir</a></div>
         </aside>
@@ -59,87 +50,60 @@
                 </div>
             </header>
 
-            <!-- VISTA: HOME -->
             <div id="home-view" class="view-section active">
-                <div class="glass-card content-card">
-                    <h3>Ciclo Lectivo 2026</h3>
-                    <p>Bienvenido al entorno profesional de NodoAndino.</p>
-                </div>
+                <div class="glass-card content-card"><h3>Dashboard PEI</h3><p>Gestión integral para el Instituto Perito Moreno.</p></div>
             </div>
 
-            <!-- VISTA: LEGAJOS (Administrativo) -->
-            <div id="legajos-view" class="view-section">
+            <div id="planificacion-view" class="view-section">
                 <section class="glass-card content-card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>Legajos de la Comunidad</h3>
-                        <button class="btn-premium btn-primary-premium">+ Nuevo Registro</button>
+                        <h3>Planificación Académica</h3>
+                        <div id="cursos-list-buttons" style="display:flex; gap:10px;"></div>
                     </div>
-                    <table class="data-table">
-                        <thead><tr><th>DNI</th><th>Nombres y Apellidos</th><th>Rol</th><th>Detalles</th></tr></thead>
-                        <tbody id="users-table-body"></tbody>
-                    </table>
+                    <p>Selecciona un curso para ver el reporte consolidado de notas (Sábana).</p>
+                    <div id="cursos-grid" class="stats-grid" style="margin-top:20px;"></div>
                 </section>
             </div>
 
-            <!-- VISTA: MIS CURSOS (Docente) -->
+            <div id="legajos-view" class="view-section">
+                <section class="glass-card content-card"><h3>Legajos de la Comunidad</h3><table class="data-table"><thead><tr><th>DNI</th><th>Nombres y Apellidos</th><th>Rol</th><th>Acciones</th></tr></thead><tbody id="users-table-body"></tbody></table></section>
+            </div>
+
             <div id="mis-cursos-view" class="view-section">
-                <section class="glass-card content-card">
-                    <h3>Mis Agrupaciones a Cargo</h3>
-                    <div id="materias-docente-list" class="stats-grid" style="margin-top:20px;"></div>
-                </section>
+                <section class="glass-card content-card"><h3>Mis Cursos Asignados</h3><div id="materias-docente-list" class="stats-grid" style="margin-top:20px;"></div></section>
             </div>
 
-            <!-- VISTA: MI BOLETÍN (Alumno) -->
             <div id="mi-boletin-view" class="view-section">
-                <section class="glass-card content-card">
-                    <h2 style="text-align: center;">Mi Trayectoria Escolar</h2>
-                    <table class="data-table" style="margin-top:20px;">
-                        <thead><tr><th>Materia</th><th>Nota</th><th>Periodo</th></tr></thead>
-                        <tbody id="boletin-table-body"></tbody>
-                    </table>
-                </section>
+                <section class="glass-card content-card"><h3>Mi Trayectoria Escolar</h3><table class="data-table"><thead><tr><th>Materia</th><th>Nota</th><th>Periodo</th></tr></thead><tbody id="boletin-table-body"></tbody></table></section>
             </div>
         </main>
     </div>
 
-    <!-- MODAL: GESTIÓN DE CURSO (DOCENTE) -->
-    <div id="modal-curso-docente" class="modal">
+    <!-- MODAL: REPORTE CONSOLIDADO -->
+    <div id="modal-consolidado" class="modal">
         <div class="glass-card modal-card">
-            <h3 id="modal-curso-titulo">Gestión de Agrupación</h3>
-            <table class="data-table" style="margin-top:20px;">
-                <thead><tr><th>Alumno (DNI)</th><th>Nombre Completo</th><th>Acción</th></tr></thead>
-                <tbody id="alumnos-curso-body"></tbody>
-            </table>
-            <button class="btn-premium btn-outline-premium" style="margin-top:20px;" onclick="closeModal('modal-curso-docente')">Cerrar</button>
-        </div>
-    </div>
-
-    <!-- MODAL: CARGA DE NOTA/INFORME -->
-    <div id="modal-nota" class="modal">
-        <div class="glass-card modal-card" style="width:400px;">
-            <h3>Cargar Calificación / Informe</h3>
-            <p id="nota-alumno-nombre" style="font-weight:700; margin-bottom:20px;"></p>
-            <form id="notaForm">
-                <input type="hidden" id="nota-alumno-dni">
-                <input type="hidden" id="nota-materia-id">
-                <div class="form-group"><label>Tipo de Registro</label><select id="nota-tipo" class="form-control-premium"><option value="trimestral">Nota Trimestral</option><option value="avance">Informe de Avance</option></select></div>
-                <div class="form-group"><label>Periodo</label><select id="nota-periodo" class="form-control-premium"><option value="1er Trimestre">1er Trimestre</option><option value="2do Trimestre">2do Trimestre</option><option value="3er Trimestre">3er Trimestre</option></select></div>
-                <div class="form-group"><label>Calificación (Numérica)</label><input type="number" id="nota-valor" class="form-control-premium" min="1" max="10"></div>
-                <div class="form-group"><label>Comentario / Informe de Avance</label><textarea id="nota-comentario" class="form-control-premium" style="height:80px;"></textarea></div>
-                <button type="submit" class="btn-premium btn-primary-premium" style="width:100%;">Guardar Registro</button>
-            </form>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 id="consolidado-titulo">Reporte Consolidado</h3>
+                <button class="btn-premium btn-primary-premium" onclick="window.print()"><i class="fas fa-print"></i> Exportar PDF</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="data-table table-consolidada">
+                    <thead id="consolidado-thead"></thead>
+                    <tbody id="consolidado-tbody"></tbody>
+                </table>
+            </div>
+            <button class="btn-premium btn-outline-premium" style="margin-top:20px;" onclick="closeModal('modal-consolidado')">Cerrar</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        let currentMateriaId = null;
-
         function showView(viewId) {
             document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById(viewId + '-view').classList.add('active');
             if (event) event.currentTarget.classList.add('active');
+            if(viewId === 'planificacion') loadCursosGrid();
             if(viewId === 'legajos') loadUsers();
             if(viewId === 'mis-cursos') loadMateriasDocente();
             if(viewId === 'mi-boletin') loadBoletin();
@@ -153,81 +117,44 @@
             document.getElementById('user-role-display').textContent = user.role.toUpperCase();
             document.getElementById('user-dni-display').textContent = 'DNI: ' + user.dni;
             document.getElementById('user-avatar').textContent = user.name.charAt(0);
-            
             if (['director', 'administrativo', 'admin_global'].includes(user.role)) document.getElementById('menu-gestion').style.display = 'block';
             if (user.role === 'docente') document.getElementById('menu-docente').style.display = 'block';
             if (user.role === 'alumno') document.getElementById('menu-alumno').style.display = 'block';
             document.getElementById('view-title').textContent = 'Panel ' + user.role.toUpperCase();
         });
 
-        function loadUsers() {
-            fetch('/api/admin/users').then(res => res.json()).then(users => {
-                document.getElementById('users-table-body').innerHTML = users.map(u => `
-                    <tr><td>${u.dni}</td><td><strong>${u.nombre_completo}</strong></td><td>${u.rol}</td><td><i class="fas fa-eye"></i></td></tr>
-                `).join('');
-            });
-        }
-
-        function loadMateriasDocente() {
-            fetch('/api/materias').then(res => res.json()).then(materias => {
-                const list = document.getElementById('materias-docente-list');
-                list.innerHTML = materias.map(m => `
-                    <div class="glass-card stat-card" style="cursor:pointer;" onclick="viewCursoAlumnos('${m._id}', '${m.nombre}', '${m.curso_id.nombre}')">
-                        <div class="stat-info"><h4>${m.curso_id.nombre}</h4><p>${m.nombre}</p></div>
+        function loadCursosGrid() {
+            fetch('/api/cursos').then(res => res.json()).then(cursos => {
+                const grid = document.getElementById('cursos-grid');
+                grid.innerHTML = cursos.map(c => `
+                    <div class="glass-card stat-card" style="cursor:pointer;" onclick="verConsolidado('${c._id}', '${c.nombre}')">
+                        <div class="stat-info"><h4>${c.nombre}</h4><p>Ver Reporte Consolidado</p></div>
                     </div>
                 `).join('');
             });
         }
 
-        function viewCursoAlumnos(materiaId, materiaNombre, cursoNombre) {
-            currentMateriaId = materiaId;
-            document.getElementById('modal-curso-titulo').textContent = `${cursoNombre} - ${materiaNombre}`;
-            fetch(`/api/materias/${materiaId}/alumnos`).then(res => res.json()).then(alumnos => {
-                document.getElementById('alumnos-curso-body').innerHTML = alumnos.map(a => `
+        function verConsolidado(cursoId, cursoNombre) {
+            document.getElementById('consolidado-titulo').textContent = `Reporte Consolidado - Curso ${cursoNombre} (2026)`;
+            fetch(`/api/admin/cursos/${cursoId}/consolidado`).then(res => res.json()).then(data => {
+                const thead = document.getElementById('consolidado-thead');
+                const tbody = document.getElementById('consolidado-tbody');
+                
+                thead.innerHTML = `<tr><th>Alumno</th>${data.materias.map(m => `<th>${m}</th>`).join('')}</tr>`;
+                tbody.innerHTML = data.consolidado.map(row => `
                     <tr>
-                        <td>${a.dni}</td>
-                        <td><strong>${a.nombre_completo}</strong></td>
-                        <td><button class="btn-premium btn-primary-premium" style="padding:5px 10px; font-size:0.7rem;" onclick="openNotaModal('${a.dni}', '${a.nombre_completo}')">Calificar/Informe</button></td>
+                        <td><strong>${row.nombre}</strong><br><small>${row.dni}</small></td>
+                        ${row.notas.map(n => `<td>${n.valor}</td>`).join('')}
                     </tr>
                 `).join('');
-                openModal('modal-curso-docente');
+                
+                openModal('modal-consolidado');
             });
         }
 
-        function openNotaModal(dni, nombre) {
-            document.getElementById('nota-alumno-dni').value = dni;
-            document.getElementById('nota-alumno-nombre').textContent = nombre;
-            document.getElementById('nota-materia-id').value = currentMateriaId;
-            openModal('modal-nota');
-        }
-
-        document.getElementById('notaForm').onsubmit = function(e) {
-            e.preventDefault();
-            const payload = {
-                alumno_dni: document.getElementById('nota-alumno-dni').value,
-                materia_id: document.getElementById('nota-materia-id').value,
-                valor: document.getElementById('nota-valor').value,
-                tipo: document.getElementById('nota-tipo').value,
-                periodo: document.getElementById('nota-periodo').value,
-                comentario: document.getElementById('nota-comentario').value
-            };
-            fetch('/api/notas', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            }).then(() => {
-                Swal.fire('Éxito', 'Registro guardado.', 'success');
-                closeModal('modal-nota');
-            });
-        };
-
-        function loadBoletin() {
-            fetch('/api/boletin').then(res => res.json()).then(notas => {
-                document.getElementById('boletin-table-body').innerHTML = notas.map(n => `
-                    <tr><td>${n.materia_id.nombre}</td><td>${n.valor || '-'}</td><td>${n.periodo}</td></tr>
-                `).join('');
-            });
-        }
+        function loadUsers() { fetch('/api/admin/users').then(res => res.json()).then(users => { document.getElementById('users-table-body').innerHTML = users.map(u => `<tr><td>${u.dni}</td><td><strong>${u.nombre_completo}</strong></td><td>${u.rol}</td><td><i class="fas fa-eye"></i></td></tr>`).join(''); }); }
+        function loadMateriasDocente() { fetch('/api/materias').then(res => res.json()).then(mats => { document.getElementById('materias-docente-list').innerHTML = mats.map(m => `<div class="glass-card stat-card"><h4>${m.curso_id.nombre}</h4><p>${m.nombre}</p></div>`).join(''); }); }
+        function loadBoletin() { fetch('/api/boletin').then(res => res.json()).then(nts => { document.getElementById('boletin-table-body').innerHTML = nts.map(n => `<tr><td>${n.materia_id.nombre}</td><td>${n.valor}</td><td>${n.periodo}</td></tr>`).join(''); }); }
     </script>
 </body>
 
