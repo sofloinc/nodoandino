@@ -99,6 +99,36 @@ app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     res.json(users);
 });
 
+// --- GESTIÓN GLOBAL (SuperAdmin) ---
+
+// Listar Instituciones
+app.get('/api/admin/entidades', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+        const entidades = await Entidad.find();
+        res.json(entidades);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al obtener instituciones' });
+    }
+});
+
+// Crear Nueva Institución + Director Inicial
+app.post('/api/admin/entidades', isAuthenticated, isAdmin, async (req, res) => {
+    const { nombre, direccion, telefono, directorDni, directorNombre, directorPassword } = req.body;
+    try {
+        const nuevaEntidad = await new Entidad({ nombre, direccion, telefono }).save();
+        await new User({
+            dni: directorDni,
+            password: directorPassword,
+            nombre_completo: directorNombre,
+            rol: 'director',
+            entidad_id: nuevaEntidad._id
+        }).save();
+        res.json({ message: 'Institución y Director creados con éxito' });
+    } catch (err) {
+        res.status(500).json({ error: 'Error al crear la institución' });
+    }
+});
+
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/');
